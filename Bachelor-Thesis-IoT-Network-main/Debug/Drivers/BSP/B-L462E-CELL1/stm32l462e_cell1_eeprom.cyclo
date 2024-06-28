@@ -1,0 +1,11 @@
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:53:10:BSP_EEPROM_Init	2
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:76:10:BSP_EEPROM_DeInit	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:97:10:BSP_EEPROM_ReadBuffer	2
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:144:10:BSP_EEPROM_WritePage	3
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:179:10:BSP_EEPROM_WriteBuffer	2
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:213:10:BSP_EEPROM_WaitEepromStandbyState	2
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:231:13:BSP_EEPROM_TIMEOUT_UserCallback	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:243:17:EEPROM_WriteLessThanPage	3
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:280:17:EEPROM_WriteMoreThanPage	7
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:339:17:EEPROM_WriteBufferAligned	6
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_eeprom.c:396:17:EEPROM_WriteBufferNotAligned	2

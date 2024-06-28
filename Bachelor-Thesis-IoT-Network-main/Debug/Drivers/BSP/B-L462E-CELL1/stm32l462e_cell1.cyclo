@@ -1,0 +1,10 @@
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:59:9:BSP_GetVersion	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:68:9:BSP_GetTick	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:82:6:BSP_LED_Init	4
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:110:6:BSP_LED_DeInit	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:131:6:BSP_LED_On	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:145:6:BSP_LED_Off	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:159:6:BSP_LED_Toggle	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:176:6:BSP_PB_Init	3
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:213:6:BSP_PB_DeInit	1
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1.c:229:10:BSP_PB_GetState	1

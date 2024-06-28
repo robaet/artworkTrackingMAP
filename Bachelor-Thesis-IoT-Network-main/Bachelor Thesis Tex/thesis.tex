@@ -1,0 +1,133 @@
+\documentclass[12pt,a4paper,english,twoside]{book}
+\usepackage[german,main=english]{babel}
+\usepackage[T1]{fontenc} 
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{epsfig}
+\usepackage{moreverb}
+\usepackage{rotating}
+\usepackage{enumerate}
+\usepackage{graphics, graphicx,wrapfig}
+\usepackage{fancybox}
+\usepackage{picinpar,varioref,floatflt}
+\usepackage{ae}
+\usepackage{longtable}
+\usepackage{textcomp}
+\usepackage{float}
+\usepackage{url}
+\usepackage{unizhdt}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[
+    backend=biber,
+    style=numeric,
+    natbib=false,
+    maxcitenames=2,
+    minbibnames=1, maxbibnames=99, 
+    url=false, 
+    doi=true,
+    ]{biblatex}
+\addbibresource{bibliography.bib}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Define the language of the diploma thesis
+\selectlanguage{english}
+%\selectlanguage{german}
+
+% Define custom colors
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.4,0.4,0.4}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+% Define code style
+\lstset{
+    backgroundcolor=\color{white},   
+    commentstyle=\color{mygreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{mygray},
+    stringstyle=\color{mymauve},
+    identifierstyle=\color{mygray},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+
+\pagestyle{headings}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Define the author printed on the cover page
+\author{Mohamed Islem Mdimagh}
+% Define the city and country of the author
+\authorcity{Zürich, Switzerland}
+% Define the student ID (Matrikelnummer)
+\studentid{20-706-735}
+% Define the title with optional subtitle
+\title{Secure IoT Network Prototyping for Artwork Tracking}
+% Define the supervisors
+\supervisors{Katharina O.E. Müller, Thomas Grübl, Prof. Dr. Burkhard Stiller}
+% Define the submission date
+\submissiondate{May 4, 2024}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Make the title page
+\maketitle
+
+% Make the imprint on the back of the cover page
+\makeimprint
+
+\pagenumbering{roman}
+
+% Include the files of the diploma thesis
+%\cleardoublepage
+\input{Chapter/declaration.tex}
+\input{Chapter/abstract.tex}
+%\cleardoublepage
+\input{Chapter/acknowledgments.tex}
+
+\tableofcontents
+
+\cleardoublepage
+\pagenumbering{arabic}
+\input{Chapter/introduction.tex}
+\input{Chapter/relatedwork.tex}
+\input{Chapter/background_knowledge.tex}
+\input{Chapter/design.tex}
+\input{Chapter/implementation.tex}
+\input{Chapter/evaluation.tex}
+\input{Chapter/summary.tex}
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\printbibliography
+
+
+\input{abbreviations.tex}
+
+
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+
+\listoftables
+\addcontentsline{toc}{chapter}{List of Tables}
+
+\input{Chapter/appendix.tex}
+
+
+\end{document}

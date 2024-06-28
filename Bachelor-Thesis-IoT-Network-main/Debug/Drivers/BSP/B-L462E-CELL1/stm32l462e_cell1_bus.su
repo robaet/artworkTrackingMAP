@@ -1,0 +1,14 @@
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:114:9:BSP_I2C1_Init	16	static,ignoring_inline_asm
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:165:9:BSP_I2C1_DeInit	16	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:195:9:BSP_I2C1_WriteReg_8b	48	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:223:10:BSP_I2C1_ReadReg_8b	48	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:252:9:BSP_I2C1_WriteReg_16b	48	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:280:10:BSP_I2C1_ReadReg_16b	48	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:306:9:BSP_I2C1_IsDeviceReady	24	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:327:9:BSP_SPI3_Init	16	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:353:9:BSP_SPI3_DeInit	16	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:373:9:BSP_SPI3_Send	24	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:390:10:BSP_SPI3_Recv	32	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:409:9:BSP_SPI3_SendRecv	40	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:428:16:I2C1_Configuration	16	static
+../Drivers/BSP/B-L462E-CELL1/stm32l462e_cell1_bus.c:530:16:SPI3_Configuration	16	static
