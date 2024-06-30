@@ -155,7 +155,11 @@ def get_mud(device_id):
     if mud:
         return jsonify({'mud': mud}), 200
     else:
-        return jsonify({'error': 'MUD not found'}), 404
+        get_mud_file(device_id)
+        if mud:
+            return jsonify({'mud': mud}), 200
+        else:
+            return jsonify({'error': 'MUD not found'}), 404
 
 
 
