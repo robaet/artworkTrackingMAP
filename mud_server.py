@@ -167,13 +167,11 @@ def get_mud_file(url, device_id):
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            return response.content
+            inventory.store_mud(device_id, response.content)
         else:
             print(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
     except requests.RequestException as e:
         print(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
-    
-    return None
 
 
 if __name__ == '__main__':
