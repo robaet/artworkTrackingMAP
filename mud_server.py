@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import json
 import requests
+import logging
 
 app = Flask(__name__)
 
@@ -160,20 +161,35 @@ def get_mud(device_id):
 
 
 def get_mud_file(url, device_id):
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='mudfile_retrieval_log.log', encoding='utf-8', level=logging.DEBUG)
     url = f"http://example.com/mud-files/{device_id}"
     if not device_id:
         url = url
     
+    headers = {
+        'Accept': 'application/mud+json',
+        'Accept-Language': 'en-US',
+        'User-Agent': 'MUDManager/1.0'
+    }
+    
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers, allow_redirects=True)
         if response.status_code == 200:
             inventory.store_mud(device_id, response.content)
+        elif response.status_code >= 300 and response.status_code < 400:
+            # Automatically follow redirects
+            redirect_url = response.headers.get('Location')
+            if redirect_url:
+                get_mud_file(redirect_url, device_id)
+            else:
+                logging.error(f"Failed to retrieve MUD file for device ID {device_id}. Redirect URL not found.")
         else:
-            print(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
+            logging.error(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
     except requests.RequestException as e:
-        print(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
+        logging.error(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
 
 
 if __name__ == '__main__':
+    get_mud_file("http://example.com/mud-files/ABC123", "ABC123")
     app.run(host='0.0.0.0', port=5000)
-
