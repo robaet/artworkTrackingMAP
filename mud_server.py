@@ -77,6 +77,9 @@ def get_mud_file(url, device_id):
         response = requests.get(url, headers=headers, allow_redirects=True)
         if response.status_code == 200:
             inventory.store_mud(device_id, response.content)
+            if not verify_mud_file(response.content):
+                logging.error(f"MUD file retrieved for device ID {device_id} is invalid.")
+                return
             inventory.store_mud_object(device_id, convert_json_to_object(inventory.get_mud(device_id)))
             logging.info(f"MUD file retrieved successfully for device ID {device_id}")
 
@@ -92,7 +95,9 @@ def get_mud_file(url, device_id):
     except requests.RequestException as e:
         logging.error(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
 
-
+def verify_mud_file(mud_file):
+    #todo implement MUD file verification
+    return True
 
 if __name__ == '__main__':
     get_mud_file("http://example.com/mud-files/ABC123", "ABC123")
