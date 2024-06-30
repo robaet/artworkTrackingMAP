@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import json
 import requests
 import logging
+import MudFileObject
 
 app = Flask(__name__)
 
@@ -167,6 +168,7 @@ def get_mud(device_id):
 
 
 #Function to fetch MUD file from the MUD File server
+#todo periodically check for updates to the MUD file
 def get_mud_file(url, device_id):
     logger = logging.getLogger(__name__)
     logging.basicConfig(filename='mudfile_retrieval_log.log', encoding='utf-8', level=logging.DEBUG)
@@ -184,6 +186,9 @@ def get_mud_file(url, device_id):
         response = requests.get(url, headers=headers, allow_redirects=True)
         if response.status_code == 200:
             inventory.store_mud(device_id, response.content)
+            validate_certificate() #todo: implement certificate validation
+            logging.info(f"MUD file retrieved successfully for device ID {device_id}")
+
         elif response.status_code >= 300 and response.status_code < 400:
             # Automatically follow redirects
             redirect_url = response.headers.get('Location')
@@ -195,6 +200,20 @@ def get_mud_file(url, device_id):
             logging.error(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
     except requests.RequestException as e:
         logging.error(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
+
+
+def validate_certificate():
+    # Check if the certificate is valid
+    pass
+
+def convert_json_to_object(mud_file):
+        data = json.load(mud_file)
+        return MudFileObject(
+            name=data['name'],
+            manufacturer=data['manufacturer'],
+            model=data['model'],
+            policy=data['policy']
+        )
 
 
 if __name__ == '__main__':
