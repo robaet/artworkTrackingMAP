@@ -29,10 +29,11 @@ device_mud = {
 }
 
 @app.route('/mud', methods=['GET'])
-def return_mud_file(device_id, mud_file_url):
+def return_mud_file():
     if not is_valid_ip(request.remote_addr):
         return jsonify({'error': 'Unauthorized IP address'}), 403
-    search_mud_file(mud_file_url, device_id, mud_server_IP)
-
+    else:
+        return jsonify({'mud': device_mud}), 200
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=7000)
