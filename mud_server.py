@@ -13,7 +13,7 @@ mud_file_server_IP = "127.0.0.1:7000" # IP address of the MUD FIle server. Must 
 class Inventory:
     def __init__(self):
         self.devices = {}
-        self.device_objects = {}
+        self.device_policies = {}
 
     def store_mud(self, device_id, mud):
         self.devices[device_id] = mud
@@ -21,11 +21,11 @@ class Inventory:
     def get_mud(self, device_id):
         return self.devices.get(device_id)
     
-    def store_mud_object(self, device_id, mud_object):
-        self.device_objects[device_id] = mud_object
+    def store_mud_policies(self, device_id, mud_object):
+        self.device_policies[device_id] = mud_object
 
-    def get_mud_object(self, device_id):
-        return self.device_objects.get(device_id)
+    def get_mud_policies(self, device_id):
+        return self.device_policies.get(device_id)
 
 inventory = Inventory()
 
@@ -48,6 +48,7 @@ def get_mud(mud_file_url, device_id):
         else:
             return jsonify({'error': 'MUD not found'}), 404
 
+#Function to convert JSON data to MudFileObject
 def convert_json_to_object(mud_file):
         data = json.load(mud_file)
         return MudFileObject(
@@ -61,6 +62,29 @@ def convert_json_to_object(mud_file):
             inbound=data['policy']['acl']['inbound'],
             outbound=data['policy']['acl']['outbound']
         )
+
+#Function to parse MUD file and extract policies
+def parse_mud(mud):
+    policies = []
+    for direction in ['inbound', 'outbound']:
+        for rule in mud['policy']['acl'][direction]:
+            policy = {
+                'direction': direction,
+                'protocol': rule['protocol'],
+                'ports': rule['src-port'],
+                'action': rule['action']
+            }
+            policies.append(policy)
+    return policies
+
+#Function to convert policies to iptables rules
+def translate_to_iptables(policies):
+    iptables_rules = []
+    for policy in policies:
+        for port in policy['ports']:
+            rule = f"iptables -A {policy['direction'].upper()} -p {policy['protocol']} --dport {port} -j {policy['action'].upper()}"
+            iptables_rules.append(rule)
+    return iptables_rules
 
 #Function to fetch MUD file from the MUD File server
 #todo periodically check for updates to the MUD file
@@ -82,7 +106,7 @@ def get_mud_file(url, device_id):
             if not verify_mud_file(response.content):
                 logging.error(f"MUD file retrieved for device ID {device_id} is invalid.")
                 return
-            inventory.store_mud_object(device_id, convert_json_to_object(inventory.get_mud(device_id)))
+            inventory.store_mud_policies(device_id, parse_mud(inventory.get_mud(device_id)))
             logging.info(f"MUD file retrieved successfully for device ID {device_id}")
 
         elif response.status_code >= 300 and response.status_code < 400:
