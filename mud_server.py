@@ -23,6 +23,7 @@ def is_valid_ip(ip_address):
     # check if the IP address is in the allowed set
     return ip_address in ALLOWED_IPS
 
+#Endpoint to receive MUD request from the MUD manager
 @app.route('/mud', methods=['POST'])
 def mud_request():
     data = request.get_json()
@@ -149,6 +150,8 @@ def mud_request():
 
     return jsonify({'status': 'OK'}), 200
 
+#Endpoint to retrieve MUD file for a specific device
+#If the MUD file is not found in the inventory, the server will attempt to fetch it from the MUD File server
 @app.route('/mud/<device_id>', methods=['GET'])
 def get_mud(device_id):
     mud = inventory.get_mud(device_id)
@@ -162,7 +165,7 @@ def get_mud(device_id):
             return jsonify({'error': 'MUD not found'}), 404
 
 
-
+#Function to fetch MUD file from the MUD File server
 def get_mud_file(url, device_id):
     url = f"http://example.com/mud-files/{device_id}"
     if not device_id:
