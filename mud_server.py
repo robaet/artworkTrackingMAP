@@ -7,6 +7,8 @@ import MudFileObject
 app = Flask(__name__)
 
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1'}
+mud_file_server_IP = "127.0.0.1:7000" # IP address of the MUD FIle server. Must be changed to the actual IP address of the MUD File server!!!
+
 
 class Inventory:
     def __init__(self):
@@ -62,90 +64,6 @@ def mud_request():
         }
     }
 
-    # currently not in use: threat MUD is a specific form of a MUD file which describes a particular cyber threat
-    threat_mud = {
-    "ietf-threatmud:mud": {
-        "threat-mud-version": 1,
-        "threat-mud-url": "https://ThreatMudServer/b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
-        "threat-id": "b0f62e766810b48fe19cc05a90e9997aae94df55b6ea9cef83ec4da0d3239116",
-        "last-update": "2019-04-17T09:47:00+00:00",
-        "cache-validity": 48,
-        "is-supported": True,
-        "Threat-Intelligence-Providers": [
-            "AVAST\nFINDING: ELF:Filecoder-AF[Trj]"
-        ],
-        "cvss-vector": "¿?",
-        "systeminfo": "Dangerous behaviour, seems DGA domain that can contain malware",
-        "from-device-policy": {
-            "access-lists": {
-                "access-list": [
-                ]
-            },
-            "mspl-list": {
-                "mspls": [
-                    {
-                        "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae"
-                    }
-                ]
-            }
-        },
-        "to-device-policy": {
-            "access-lists": {
-                "access-list": [
-                ]
-            },
-            "mspl-list": {
-                "mspls": [
-                    {
-                        "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae"
-                    }
-                ]
-            }
-        }
-    },
-    "ietf-access-control-list:acls": {
-        "acl": []
-    },
-    "umu-mspl-list:mspls": {
-        "mspl": [
-            {
-                "name": "mspl_42c0f156-6ee5-4e86-93d9-bfe568d267ae",
-                "type": "ipv4-mspl-type",
-                "configuration": {
-                    "capability": "Filtering_L4",
-                    "rule-set-configuration": {
-                        "name": "mspl_set_653cb05e-1a92-4ce7-bafe-01f265436ff3",
-                        "configuration-rule": [
-                            {
-                                "name": "Rule_d748f2a9-ed32-4b4d-bd87-a1cf5e9854f5",
-                                "isCNF": False,
-                                "external-data": {
-                                    "priority": 500
-                                },
-                                "configuration-action": {
-                                    "bootstrapping-action": {
-                                        "bootstrapping-action-type": "UPDATE",
-                                        "bootstrapping-model-version": "0.2",
-                                        "network-bootstrapping-model": "((PortclSrc-42,UDP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,UDP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,UDP-45)=([2.0,2.0],[1.0,1.0])) AND ((PortclSrc-42,DHCP-45)=([1.0,1.0],[0.0,0.0]) OR (PortclSrc-42,DHCP-45)=([0.0,0.0],[-1.0,-1.0]) OR (PortclSrc-42,DHCP-45)=([2.0,2.0],[1.0,1.0]))",
-                                        "network-bootstrapping-model-signature": "3ca5d818857d9f13efe6d78864f88a37d726d4c71"
-                                    }
-                                },
-                                "configuration-condition": {
-                                    "bootstrapping-configuration-condition": {
-                                        "device-condition": {
-                                            "name": "Aria"
-                                        }
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        ]
-    }
-    }
-
     # store MUD in inventory
     inventory.store_mud(device_id, device_mud)
     print("Stored MUD profile for device ID: ", device_id)
@@ -154,13 +72,13 @@ def mud_request():
 
 #Endpoint to retrieve MUD file for a specific device
 #If the MUD file is not found in the inventory, the server will attempt to fetch it from the MUD File server
-@app.route('/mud/<device_id>', methods=['GET'])
-def get_mud(device_id):
+@app.route('/mud/<device_id>/<mud_file_url>', methods=['GET'])
+def get_mud(mud_file_url, device_id):
     mud = inventory.get_mud(device_id)
     if mud:
         return jsonify({'mud': mud}), 200
     else:
-        get_mud_file(device_id)
+        get_mud_file(mud_file_url, device_id)
         if mud:
             return jsonify({'mud': mud}), 200
         else:
@@ -172,10 +90,8 @@ def get_mud(device_id):
 def get_mud_file(url, device_id):
     logger = logging.getLogger(__name__)
     logging.basicConfig(filename='mudfile_retrieval_log.log', encoding='utf-8', level=logging.DEBUG)
-    url = f"http://example.com/mud-files/{device_id}"
-    if not device_id:
-        url = url
-    
+    url =url + "/mud"
+
     headers = {
         'Accept': 'application/mud+json',
         'Accept-Language': 'en-US',
