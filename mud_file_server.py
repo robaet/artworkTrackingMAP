@@ -1,6 +1,4 @@
 from flask import Flask, request, jsonify
-import json
-import requests
 
 app = Flask(__name__)
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1'}
