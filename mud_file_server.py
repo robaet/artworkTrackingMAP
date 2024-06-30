@@ -9,22 +9,33 @@ def is_valid_ip(ip_address):
 
 # sample device MUD file in JSON format. This MUD file (if enforced correctly) would allow the IoT device to accept inbound HTTP and HTTPS
 device_mud = {
-    'name': 'Sample MUD Profile',
-    'manufacturer': 'Example',
-    'model': 'ABC123',
-    'policy': {
-        'acl': {
-            'inbound': [
-                {
-                    'name': 'allow_http',
-                    'protocol': 'tcp',
-                    'src-port': [80, 443],
-                    'action': 'allow'
-                }
-            ]
+        'name': 'Sample MUD Profile',
+        'manufacturer': 'Example',
+        'model': 'ABC123',
+        'cache-validity': 48,
+        'mud_url': "http://example.com/mud-files/ABC123",
+        'last_update': "2019-04-17T09:47:00+00:00",
+        'policy': {
+            'acl': {
+                'inbound': [
+                    {
+                        'name': 'allow_http',
+                        'protocol': 'tcp',
+                        'src-port': [80, 443],
+                        'action': 'allow'
+                    }
+                ],
+                'outbound': [
+                    {
+                        'name': 'allow_http',
+                        'protocol': 'tcp',
+                        'src-port': [80, 443],
+                        'action': 'allow'
+                    }
+                ]
+            }
         }
     }
-}
 
 @app.route('/mud', methods=['GET'])
 def return_mud_file():

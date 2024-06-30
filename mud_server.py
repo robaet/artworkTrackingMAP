@@ -84,7 +84,10 @@ def convert_json_to_object(mud_file):
             name=data['name'],
             manufacturer=data['manufacturer'],
             model=data['model'],
-            policy=data['policy']
+            policy=data['policy'],
+            last_update=data['last_update'],
+            mud_url=data['mud_url'],
+            cache_validity=data['cache-validity']
         )
 
 
