@@ -57,7 +57,9 @@ def convert_json_to_object(mud_file):
             policy=data['policy'],
             last_update=data['last_update'],
             mud_url=data['mud_url'],
-            cache_validity=data['cache-validity']
+            cache_validity=data['cache-validity'],
+            inbound=data['policy']['acl']['inbound'],
+            outbound=data['policy']['acl']['outbound']
         )
 
 #Function to fetch MUD file from the MUD File server
