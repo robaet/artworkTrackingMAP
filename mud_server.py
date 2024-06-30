@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import json
+import requests
 
 app = Flask(__name__)
 
@@ -156,5 +157,25 @@ def get_mud(device_id):
     else:
         return jsonify({'error': 'MUD not found'}), 404
 
+
+
+def get_mud_file(url, device_id):
+    url = f"http://example.com/mud-files/{device_id}"
+    if not device_id:
+        url = url
+    
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
+    except requests.RequestException as e:
+        print(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
+    
+    return None
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
