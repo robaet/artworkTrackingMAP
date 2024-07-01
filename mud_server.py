@@ -3,6 +3,7 @@ import json
 import requests
 import logging
 import MudFileObject
+from rule_enforcement import translate_to_iptables, enforce_ip_table
 
 app = Flask(__name__)
 
@@ -45,6 +46,8 @@ def retrieve_mud(device_id):
     else:
         get_mud_file(mud_file_url, device_id)
         mud = inventory.get_mud(device_id)
+        ip_table = translate_to_iptables(inventory.get_mud_policies(device_id))
+        enforce_ip_table(ip_table)
         if mud:
             return jsonify({'message': "MUD found"}), 200
         else:
@@ -83,14 +86,7 @@ def parse_mud(mud):
             policies.append(policy)
     return policies
 
-#Function to convert policies to iptables rules
-def translate_to_iptables(policies):
-    iptables_rules = []
-    for policy in policies:
-        for port in policy['ports']:
-            rule = f"iptables -A {policy['direction'].upper()} -p {policy['protocol']} --dport {port} -j " + "ACCEPT" if {policy['action'].upper()=="allow"} else "DROP"
-            iptables_rules.append(rule)
-    return iptables_rules
+
 
 #Function to fetch MUD file from the MUD File server
 #todo periodically check for updates to the MUD file
