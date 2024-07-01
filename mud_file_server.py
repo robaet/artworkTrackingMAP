@@ -37,6 +37,7 @@ device_mud = {
         }
     }
 
+# Endpoint to return the MUD file for the device
 @app.route('/mud', methods=['GET'])
 def return_mud_file():
     if not is_valid_ip(request.remote_addr):

@@ -9,7 +9,7 @@ app = Flask(__name__)
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1'}
 mud_file_server_IP = "127.0.0.1:7000" # IP address of the MUD FIle server. Must be changed to the actual IP address of the MUD File server!!!
 
-
+#Class to store MUD file and policies
 class Inventory:
     def __init__(self):
         self.devices = {}
