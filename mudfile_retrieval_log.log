@@ -9,3 +9,57 @@ INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.1.120:5000
 INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.120:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.120:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.120:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.120:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.120:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): example.com:80
+DEBUG:urllib3.connectionpool:http://example.com:80 "GET /mud-files/ABC123/mud HTTP/1.1" 500 433
+ERROR:root:Failed to retrieve MUD file for device ID ABC123. HTTP status code: 500
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.120:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
