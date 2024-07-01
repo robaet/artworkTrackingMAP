@@ -6,8 +6,8 @@ import MudFileObject
 
 app = Flask(__name__)
 
-ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1'}
-mud_file_server_IP = "127.0.0.1:7000" # IP address of the MUD FIle server. Must be changed to the actual IP address of the MUD File server!!!
+ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145'}
+mud_file_server_IP = "http://127.0.0.1:7000" # IP address of the MUD FIle server. Must be changed to the actual IP address of the MUD File server!!!
 
 #Class to store MUD file and policies
 class Inventory:
@@ -36,8 +36,9 @@ def is_valid_ip(ip_address):
 
 #Endpoint to retrieve MUD file for a specific device
 #If the MUD file is not found in the inventory, the server will attempt to fetch it from the MUD File server
-@app.route('/mud/<device_id>/<mud_file_url>', methods=['GET'])
-def get_mud(mud_file_url, device_id):
+@app.route('/mud/<device_id>', methods=['GET'])
+def retrieve_mud(device_id):
+    mud_file_url = request.args.get('mud_file_url')
     mud = inventory.get_mud(device_id)
     if mud:
         return jsonify({'mud': mud}), 200
@@ -89,42 +90,24 @@ def translate_to_iptables(policies):
 #Function to fetch MUD file from the MUD File server
 #todo periodically check for updates to the MUD file
 def get_mud_file(url, device_id):
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(filename='mudfile_retrieval_log.log', encoding='utf-8', level=logging.DEBUG)
-    url =url + "/mud"
-
-    headers = {
-        'Accept': 'application/mud+json',
-        'Accept-Language': 'en-US',
-        'User-Agent': 'MUDManager/1.0'
-    }
-    
+    url=url + "/mud"
     try:
-        response = requests.get(url, headers=headers, allow_redirects=True)
+        response = requests.get(url)
         if response.status_code == 200:
             inventory.store_mud(device_id, response.content)
             if not verify_mud_file(response.content):
-                logging.error(f"MUD file retrieved for device ID {device_id} is invalid.")
+                print(f"MUD file retrieved for device ID {device_id} is invalid.")
                 return
             inventory.store_mud_policies(device_id, parse_mud(inventory.get_mud(device_id)))
-            logging.info(f"MUD file retrieved successfully for device ID {device_id}")
-
-        elif response.status_code >= 300 and response.status_code < 400:
-            # Automatically follow redirects
-            redirect_url = response.headers.get('Location')
-            if redirect_url:
-                get_mud_file(redirect_url, device_id)
-            else:
-                logging.error(f"Failed to retrieve MUD file for device ID {device_id}. Redirect URL not found.")
+            print(f"MUD file retrieved successfully for device ID {device_id}")
         else:
-            logging.error(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
+            print(f"Failed to retrieve MUD file for device ID {device_id}. HTTP status code: {response.status_code}")
     except requests.RequestException as e:
-        logging.error(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
+        print(f"An error occurred while fetching the MUD file for device ID {device_id}: {e}")
 
 def verify_mud_file(mud_file):
     #todo implement MUD file verification
     return True
 
 if __name__ == '__main__':
-    get_mud_file("http://example.com/mud-files/ABC123", "ABC123")
     app.run(host='0.0.0.0', port=5000)
