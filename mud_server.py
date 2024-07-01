@@ -44,8 +44,9 @@ def retrieve_mud(device_id):
         return jsonify({'mud': mud}), 200
     else:
         get_mud_file(mud_file_url, device_id)
+        mud = inventory.get_mud(device_id)
         if mud:
-            return jsonify({'mud': mud}), 200
+            return jsonify({'message': "MUD found"}), 200
         else:
             return jsonify({'error': 'MUD not found'}), 404
 
@@ -67,8 +68,12 @@ def convert_json_to_object(mud_file):
 #Function to parse MUD file and extract policies
 def parse_mud(mud):
     policies = []
+    json_string = mud.decode('utf-8')
+    import json
+    json_data = json.loads(json_string)
+
     for direction in ['inbound', 'outbound']:
-        for rule in mud['policy']['acl'][direction]:
+        for rule in json_data['mud']['policy']['acl'][direction]:
             policy = {
                 'direction': direction,
                 'protocol': rule['protocol'],
