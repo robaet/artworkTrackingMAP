@@ -1,1 +1,0 @@
-#todo alli api calls da ineverschiebe
