@@ -82,7 +82,7 @@ def translate_to_iptables(policies):
     iptables_rules = []
     for policy in policies:
         for port in policy['ports']:
-            rule = f"iptables -A {policy['direction'].upper()} -p {policy['protocol']} --dport {port} -j {policy['action'].upper()}"
+            rule = f"iptables -A {policy['direction'].upper()} -p {policy['protocol']} --dport {port} -j " + "ACCEPT" if {policy['action'].upper()=="allow"} else "DROP"
             iptables_rules.append(rule)
     return iptables_rules
 
