@@ -73,14 +73,9 @@ def retrieve_mud(device_id):
         mud_sig = sign_mudfile(mud, key_pair[0])
         return {"mud": device_mud, "sig": mud_sig.hex()}, 200
     else:
-        print("entered ELSE")
         inventory.store_mud(device_id, device_mud)
-        print("stroed MUD")
         print(f"sample MUD file used for device ID {device_id}")
         mud_sig = sign_mudfile(device_mud, key_pair[0])
-        print("signed MUD")
-        print(type(device_mud))
-        print(type(mud_sig.hex()))
         return {"mud": device_mud, "sig": mud_sig.hex()}, 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
