@@ -71,7 +71,8 @@ def retrieve_mud(device_id):
 #TODO implement a POST endpoint to add new MUD files from the outside
 @app.route('/mud/<device_id>', methods=['POST'])
 def post_mud(device_id):
-    pass
+    #maybe check the file for validity first?
+    inventory.store_mud(device_id, request.json)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
