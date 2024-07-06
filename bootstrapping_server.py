@@ -13,16 +13,19 @@ def is_valid_ip(ip_address):
     return ip_address in ALLOWED_IPS
 
 #Function to tell server to retrieve a MUD file for a device
-#Send a request to the MUD server with a device ID and MUD file URL
-def search_mud_file(mud_file_url, device_id, mud_server_IP):
-    url = f"{mud_server_IP}/mud/{device_id}?mud_file_url={mud_file_url}"
+#Send a request to the MUD server with a device ID
+def search_mud_file(device_id, mud_server_IP, public_key):
+    url = f"{mud_server_IP}/mud/{device_id}"
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            if not verify_mud_file(response.content):
+            data = response.json()
+            mud = data['mud']
+            sig = data['sig']
+            if not verify_mud_file(mud, sig, public_key):
                 print(f"MUD file retrieved for device ID {device_id} is invalid.")
             else:
-                enforce_ip_table(translate_to_iptables(parse_mud(response.content)))
+                enforce_ip_table(translate_to_iptables(parse_mud(mud)))
         else:
             print(f"Failed to request MUD file retrieval for device ID {device_id}. HTTP status code: {response.status_code}")
     except requests.RequestException as e:
@@ -31,10 +34,10 @@ def search_mud_file(mud_file_url, device_id, mud_server_IP):
 #Endpoint to receive request from IOT device to retrieve MUD file
 @app.route('/mud/<device_id>', methods=['GET'])
 def retrieve_mud_file(device_id):
-    mud_file_url = request.args.get('mud_file_url')
     if not is_valid_ip(request.remote_addr):
         return jsonify({'error': 'Unauthorized IP address'}), 403
-    search_mud_file(mud_file_url, device_id, mud_server_IP)
+    public_key = requests.get(f"{mud_server_IP}/pk").json()['public_key']
+    search_mud_file(device_id, mud_server_IP, public_key)
     return jsonify({'message': 'MUD file retrieval request sent to MUD server'}), 200
 
 def parse_mud(mud):
@@ -56,19 +59,22 @@ def parse_mud(mud):
 
 #Function to verify the MUD file's signature
 #TODO test this function
-def verify_mud_file(mudfile_path, signature, public_key):
+def verify_mud_file(mudfile, signature, public_key):
     with open("temp_public_key.pem", "w") as f:
         f.write(public_key)
     with open("mudfile.sig", "wb") as f:
         f.write(signature)
+    with open("temp_mudfile.json", "w") as f:
+        f.write(mudfile)
     
     result = subprocess.run(
-        ["openssl", "dgst", "-sha256", "-verify", "temp_public_key.pem", "-signature", "mudfile.sig", mudfile_path],
+        ["openssl", "dgst", "-sha256", "-verify", "temp_public_key.pem", "-signature", "mudfile.sig", "temp_mudfile.json"],
         capture_output=True,
         check=True,
         text=True
     )
-    subprocess.run(["rm", "temp_public_key.pem", "mudfile.sig"])
+    
+    subprocess.run(["rm", "temp_mudfile.json", "temp_public_key.pem", "mudfile.sig"]) 
     return "Verified OK" in result.stdout
 
 if __name__ == '__main__':
