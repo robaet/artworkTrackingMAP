@@ -1,7 +1,11 @@
 from flask import Flask, jsonify, request
 from key_generator import generate_keys
-import subprocess
 import json
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import utils
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 app = Flask(__name__)
 
@@ -67,14 +71,17 @@ def retrieve_mud(device_id):
     if mud:
         print(f"MUD file found for device ID {device_id}")
         mud_sig = sign_mudfile(mud, key_pair[0])
-        return jsonify({'mud': mud, 'sig': mud_sig}), 200
+        return [device_mud, mud_sig.hex()], 200
     else:
         print("entered ELSE")
         inventory.store_mud(device_id, device_mud)
         print("stroed MUD")
         print(f"sample MUD file used for device ID {device_id}")
         mud_sig = sign_mudfile(device_mud, key_pair[0])
-        return jsonify({'mud': device_mud, 'sig': mud_sig}), 200
+        print("signed MUD")
+        print(type(device_mud))
+        print(type(mud_sig.hex()))
+        return [device_mud, mud_sig.hex()], 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
 @app.route('/mud/<device_id>', methods=['POST'])
@@ -104,30 +111,29 @@ def retrieve_public_key():
 
 #Function to sign the MUD file
 #TODO test this function
-def sign_mudfile(mudfile_json, private_key):
-    with open("temp_private_key.pem", "w") as f:
-        f.write(private_key.decode('utf-8'))
-    with open("temp_mudfile.json", "w") as f:
-        f.write(dict_to_json_string(mudfile_json))
-    
-    subprocess.run(
-        ["openssl", "dgst", "-sha256", "-sign", "temp_private_key.pem", "-out", "mudfile.sig", "temp_mudfile.json"],
-        check=True
+def sign_mudfile(mud, pk):
+    # Load private key
+    private_key = load_pem_private_key(pk, password=None, backend=default_backend())
+
+    # Serialize JSON dictionary to bytes
+    json_data = json.dumps(mud, separators=(',', ':')).encode('utf-8')
+
+    # Calculate the digest of the data
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(json_data)
+    hashed_data = digest.finalize()
+
+    # Sign the hashed data
+    signature = private_key.sign(
+        hashed_data,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        utils.Prehashed(hashes.SHA256())
     )
-    
-    with open("mudfile.sig", "rb") as f:
-        signature = f.read()
 
-    subprocess.run(["rm", "temp_mudfile.json", "temp_private_key.pem", "mudfile.sig"])
     return signature
-
-def dict_to_json_string(data):
-    try:
-        json_str = json.dumps(data)
-        return json_str
-    except TypeError as e:
-        print(f"Error converting to JSON: {e}")
-        return None
     
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

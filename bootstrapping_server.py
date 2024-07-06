@@ -1,7 +1,11 @@
 from flask import Flask, request, jsonify
 from rule_enforcement import translate_to_iptables, enforce_ip_table
 import requests
-import subprocess
+import json
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
 
 app = Flask(__name__)
 
@@ -19,9 +23,9 @@ def search_mud_file(device_id, mud_server_IP, public_key):
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            data = response.json()
-            mud = data['mud']
-            sig = data['sig']
+            data = response.content
+            mud = data[0]
+            sig = data[1]
             if not verify_mud_file(mud, sig, public_key):
                 print(f"MUD file retrieved for device ID {device_id} is invalid.")
             else:
@@ -60,23 +64,33 @@ def parse_mud(mud):
 
 #Function to verify the MUD file's signature
 #TODO test this function
-def verify_mud_file(mudfile, signature, public_key):
-    with open("temp_public_key.pem", "w") as f:
-        f.write(public_key.decode('utf-8'))
-    with open("mudfile.sig", "wb") as f:
-        f.write(signature)
-    with open("temp_mudfile.json", "w") as f:
-        f.write(mudfile)
-    
-    result = subprocess.run(
-        ["openssl", "dgst", "-sha256", "-verify", "temp_public_key.pem", "-signature", "mudfile.sig", "temp_mudfile.json"],
-        capture_output=True,
-        check=True,
-        text=True
-    )
-    
-    subprocess.run(["rm", "temp_mudfile.json", "temp_public_key.pem", "mudfile.sig"]) 
-    return "Verified OK" in result.stdout
+def verify_mud_file(mud, signature, key):
+    # Load public key
+    public_key = serialization.load_pem_public_key(key, backend=default_backend())
+
+    # Serialize JSON dictionary to bytes
+    json_data = json.dumps(mud, separators=(',', ':')).encode('utf-8')
+
+    # Calculate the digest of the data
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(json_data)
+    hashed_data = digest.finalize()
+
+    # Verify the signature
+    try:
+        public_key.verify(
+            signature,
+            hashed_data,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except Exception as e:
+        print(f"Verification failed: {str(e)}")
+        return False
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6000)
