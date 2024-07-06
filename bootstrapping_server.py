@@ -23,9 +23,12 @@ def search_mud_file(device_id, mud_server_IP, public_key):
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            data = response.content
-            mud = data[0]
-            sig = data[1]
+            data = json.loads(response.content.decode('utf-8'))
+            mud = data["mud"]
+            sig = data["sig"]
+            print(mud)
+            print("BLBLLBBLBLALBLALBLALBLABL")
+            print(sig)
             if not verify_mud_file(mud, sig, public_key):
                 print(f"MUD file retrieved for device ID {device_id} is invalid.")
             else:
@@ -66,6 +69,7 @@ def parse_mud(mud):
 #TODO test this function
 def verify_mud_file(mud, signature, key):
     # Load public key
+    print(type(key))
     public_key = serialization.load_pem_public_key(key, backend=default_backend())
 
     # Serialize JSON dictionary to bytes
