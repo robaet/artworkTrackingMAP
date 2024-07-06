@@ -69,8 +69,8 @@ def parse_mud(mud):
 #TODO test this function
 def verify_mud_file(mud, signature, key):
     # Load public key
-    print(type(key))
-    public_key = serialization.load_pem_public_key(key, backend=default_backend())
+    print(type(key.content))
+    public_key = serialization.load_pem_public_key(key.content, backend=default_backend())
 
     # Serialize JSON dictionary to bytes
     json_data = json.dumps(mud, separators=(',', ':')).encode('utf-8')
