@@ -65,6 +65,10 @@ def parse_mud(mud):
 #Function to verify the MUD file's signature
 #TODO test this function
 def verify_mud_file(mud, signature, key):
+    print(type(mud))
+    print(type(signature))
+    print(type(key))
+
     # Load public key
     public_key = serialization.load_pem_public_key(key.content, backend=default_backend())
 
@@ -79,7 +83,7 @@ def verify_mud_file(mud, signature, key):
     # Verify the signature
     try:
         public_key.verify(
-            signature,
+            signature.encode('utf-8'),
             hashed_data,
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
