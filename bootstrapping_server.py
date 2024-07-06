@@ -13,7 +13,7 @@ def is_valid_ip(ip_address):
     return ip_address in ALLOWED_IPS
 
 #Function to tell server to retrieve a MUD file for a device
-#Send a request to the MUD server with a device ID
+#Send a request to the MUD server with a device ID, also verifies the MUD file
 def search_mud_file(device_id, mud_server_IP, public_key):
     url = f"{mud_server_IP}/mud/{device_id}"
     try:
@@ -40,6 +40,7 @@ def retrieve_mud_file(device_id):
     search_mud_file(device_id, mud_server_IP, public_key)
     return jsonify({'message': 'MUD file retrieval request sent to MUD server'}), 200
 
+#Function to parse the MUD file
 def parse_mud(mud):
     policies = []
     json_string = mud.decode('utf-8')
