@@ -68,10 +68,19 @@ def retrieve_mud(device_id):
         print(f"sample MUD file used for device ID {device_id}")
         return jsonify({'mud': device_mud}), 200
         
-#TODO implement a POST endpoint to add new MUD files from the outside
 @app.route('/mud/<device_id>', methods=['POST'])
 def post_mud(device_id):
-    pass
+    new_mud = request.get_json()
+
+    inventory.store_mud(device_id, new_mud)
+
+    response = {
+        'status': 'success',
+        'message': 'Data received',
+        'data': new_mud
+    }
+
+    return jsonify(response), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
