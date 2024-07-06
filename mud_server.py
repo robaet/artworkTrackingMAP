@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request
+from key_generator import generate_keys
+import subprocess
 
 app = Flask(__name__)
 
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145'}
 
-#Class to store MUD file and policies
+#Class to store MUD files in the inventory
 class Inventory:
     def __init__(self):
         self.devices = {}
@@ -18,7 +20,10 @@ class Inventory:
 
 inventory = Inventory()
 
-# sample device MUD file in JSON format. This MUD file (if enforced correctly) would allow the IoT device to accept inbound HTTP and HTTPS
+#TODO make reasonably safe
+key_pair = generate_keys()
+
+#Sample device MUD file in JSON format. This MUD file (if enforced correctly) would allow the IoT device to accept inbound HTTP and HTTPS
 device_mud = {
         'name': 'Sample MUD Profile',
         'manufacturer': 'Example',
@@ -48,7 +53,7 @@ device_mud = {
         }
     }
 
-
+#Function to check if the IP address is in the allowed set
 def is_valid_ip(ip_address):
     # check if the IP address is in the allowed set
     return ip_address in ALLOWED_IPS
@@ -82,6 +87,23 @@ def post_mud(device_id):
     }
 
     return jsonify(response), 200
+
+#Function to sign the MUD file
+#TODO test this function
+def sign_mudfile(mudfile_path, private_key):
+    with open("temp_private_key.pem", "w") as f:
+        f.write(private_key)
+    
+    subprocess.run(
+        ["openssl", "dgst", "-sha256", "-sign", "temp_private_key.pem", "-out", "mudfile.sig", mudfile_path],
+        check=True
+    )
+    
+    with open("mudfile.sig", "rb") as f:
+        signature = f.read()
+
+    subprocess.run(["rm", "temp_private_key.pem"])
+    return signature
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
