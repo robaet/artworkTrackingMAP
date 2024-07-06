@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from rule_enforcement import translate_to_iptables, enforce_ip_table
 import requests
+import subprocess
 
 app = Flask(__name__)
 
@@ -53,9 +54,22 @@ def parse_mud(mud):
             policies.append(policy)
     return policies
 
-def verify_mud_file(mud_file):
-    #todo implement MUD file verification
-    return True
+#Function to verify the MUD file's signature
+#TODO test this function
+def verify_mud_file(mudfile_path, signature, public_key):
+    with open("temp_public_key.pem", "w") as f:
+        f.write(public_key)
+    with open("mudfile.sig", "wb") as f:
+        f.write(signature)
+    
+    result = subprocess.run(
+        ["openssl", "dgst", "-sha256", "-verify", "temp_public_key.pem", "-signature", "mudfile.sig", mudfile_path],
+        capture_output=True,
+        check=True,
+        text=True
+    )
+    subprocess.run(["rm", "temp_public_key.pem", "mudfile.sig"])
+    return "Verified OK" in result.stdout
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6000)
