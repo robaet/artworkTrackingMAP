@@ -1,20 +1,12 @@
-import subprocess
+from Crypto.PublicKey import RSA
 
 def generate_keys():
-    private_key = subprocess.run(
-        ["openssl", "genpkey", "-algorithm", "RSA"],
-        capture_output=True,
-        check=True,
-        text=True
-    ).stdout
-
-    # Generate public key from the private key
-    public_key = subprocess.run(
-        ["openssl", "rsa", "-pubout"],
-        input=private_key,
-        capture_output=True,
-        check=True,
-        text=True
-    ).stdout
-
-    return private_key, public_key
+    # Generate RSA key pair
+    key = RSA.generate(2048)
+    
+    # Extract the components
+    private_key = key.export_key()
+    public_key = key.publickey().export_key()
+    
+    # Return as tuple
+    return public_key, private_key
