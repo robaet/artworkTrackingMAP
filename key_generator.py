@@ -9,4 +9,4 @@ def generate_keys():
     public_key = key.publickey().export_key()
     
     # Return as tuple
-    return public_key, private_key
+    return private_key, public_key

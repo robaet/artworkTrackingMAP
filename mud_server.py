@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from key_generator import generate_keys
 import subprocess
+import json
 
 app = Flask(__name__)
 
@@ -68,7 +69,9 @@ def retrieve_mud(device_id):
         mud_sig = sign_mudfile(mud, key_pair[0])
         return jsonify({'mud': mud, 'sig': mud_sig}), 200
     else:
+        print("entered ELSE")
         inventory.store_mud(device_id, device_mud)
+        print("stroed MUD")
         print(f"sample MUD file used for device ID {device_id}")
         mud_sig = sign_mudfile(device_mud, key_pair[0])
         return jsonify({'mud': device_mud, 'sig': mud_sig}), 200
@@ -94,7 +97,7 @@ def retrieve_public_key():
     pk = key_pair[1]
     if pk:
         print(f"found public key {pk}")
-        return jsonify({'public_key': pk}), 200
+        return pk, 200
     else:
         print(f"no public key found")
         return jsonify({'error': 'public key not found'}), 404
@@ -103,9 +106,9 @@ def retrieve_public_key():
 #TODO test this function
 def sign_mudfile(mudfile_json, private_key):
     with open("temp_private_key.pem", "w") as f:
-        f.write(private_key)
+        f.write(private_key.decode('utf-8'))
     with open("temp_mudfile.json", "w") as f:
-        f.write(mudfile_json)
+        f.write(dict_to_json_string(mudfile_json))
     
     subprocess.run(
         ["openssl", "dgst", "-sha256", "-sign", "temp_private_key.pem", "-out", "mudfile.sig", "temp_mudfile.json"],
@@ -118,5 +121,13 @@ def sign_mudfile(mudfile_json, private_key):
     subprocess.run(["rm", "temp_mudfile.json", "temp_private_key.pem", "mudfile.sig"])
     return signature
 
+def dict_to_json_string(data):
+    try:
+        json_str = json.dumps(data)
+        return json_str
+    except TypeError as e:
+        print(f"Error converting to JSON: {e}")
+        return None
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

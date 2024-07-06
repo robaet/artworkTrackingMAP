@@ -36,7 +36,7 @@ def search_mud_file(device_id, mud_server_IP, public_key):
 def retrieve_mud_file(device_id):
     if not is_valid_ip(request.remote_addr):
         return jsonify({'error': 'Unauthorized IP address'}), 403
-    public_key = requests.get(f"{mud_server_IP}/pk").json()['public_key']
+    public_key = requests.get(f"{mud_server_IP}/pk")
     search_mud_file(device_id, mud_server_IP, public_key)
     return jsonify({'message': 'MUD file retrieval request sent to MUD server'}), 200
 
@@ -62,7 +62,7 @@ def parse_mud(mud):
 #TODO test this function
 def verify_mud_file(mudfile, signature, public_key):
     with open("temp_public_key.pem", "w") as f:
-        f.write(public_key)
+        f.write(public_key.decode('utf-8'))
     with open("mudfile.sig", "wb") as f:
         f.write(signature)
     with open("temp_mudfile.json", "w") as f:
