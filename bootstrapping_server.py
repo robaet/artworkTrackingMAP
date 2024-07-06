@@ -67,30 +67,29 @@ def parse_mud(mud):
 def verify_mud_file(mud, signature, key):
     print(type(mud))
     print(type(signature))
-    print(type(key))
+    print(type(key.content))
+
+    signature_bytes = bytes.fromhex(signature)
+    public_key_bytes = key.content
+
 
     # Load public key
-    public_key = serialization.load_pem_public_key(key.content, backend=default_backend())
+    public_key = serialization.load_pem_public_key(public_key_bytes, backend=default_backend())
 
-    # Serialize JSON dictionary to bytes
-    json_data = json.dumps(mud, separators=(',', ':')).encode('utf-8')
+    # Convert the mudfile_dict to bytes
+    mudfile_bytes = json.dumps(mud).encode('utf-8')
 
-    # Calculate the digest of the data
-    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-    digest.update(json_data)
-    hashed_data = digest.finalize()
+    print(signature_bytes)
 
-    # Verify the signature
+    # Perform the verification
     try:
         public_key.verify(
-            signature.encode('utf-8'),
-            hashed_data,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
+            signature_bytes,
+            mudfile_bytes,
+            padding.PKCS1v15(),
             hashes.SHA256()
         )
+        print("Signature is valid.")
         return True
     except Exception as e:
         print(f"Verification failed: {str(e)}")
