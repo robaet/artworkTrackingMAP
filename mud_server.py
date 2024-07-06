@@ -62,16 +62,16 @@ def is_valid_ip(ip_address):
 #If the MUD file is not found in the inventory, the server just use the sample device MUD file for now
 @app.route('/mud/<device_id>', methods=['GET'])
 def retrieve_mud(device_id):
-    #TODO do something with the MUD file url. So far the mudfiles are retrieved via device ID
-    mud_file_url = request.args.get('mud_file_url')
     mud = inventory.get_mud(device_id)
     if mud:
         print(f"MUD file found for device ID {device_id}")
-        return jsonify({'mud': mud}), 200
+        mud_sig = sign_mudfile(mud, key_pair[0])
+        return jsonify({'mud': mud, 'sig': mud_sig}), 200
     else:
         inventory.store_mud(device_id, device_mud)
         print(f"sample MUD file used for device ID {device_id}")
-        return jsonify({'mud': device_mud}), 200
+        mud_sig = sign_mudfile(device_mud, key_pair[0])
+        return jsonify({'mud': device_mud, 'sig': mud_sig}), 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
 @app.route('/mud/<device_id>', methods=['POST'])
@@ -88,21 +88,34 @@ def post_mud(device_id):
 
     return jsonify(response), 200
 
+#Endpoint to retrieve the public key of the server
+@app.route('/pk', methods=['GET'])
+def retrieve_public_key():
+    pk = key_pair[1]
+    if pk:
+        print(f"found public key {pk}")
+        return jsonify({'public_key': pk}), 200
+    else:
+        print(f"no public key found")
+        return jsonify({'error': 'public key not found'}), 404
+
 #Function to sign the MUD file
 #TODO test this function
-def sign_mudfile(mudfile_path, private_key):
+def sign_mudfile(mudfile_json, private_key):
     with open("temp_private_key.pem", "w") as f:
         f.write(private_key)
+    with open("temp_mudfile.json", "w") as f:
+        f.write(mudfile_json)
     
     subprocess.run(
-        ["openssl", "dgst", "-sha256", "-sign", "temp_private_key.pem", "-out", "mudfile.sig", mudfile_path],
+        ["openssl", "dgst", "-sha256", "-sign", "temp_private_key.pem", "-out", "mudfile.sig", "temp_mudfile.json"],
         check=True
     )
     
     with open("mudfile.sig", "rb") as f:
         signature = f.read()
 
-    subprocess.run(["rm", "temp_private_key.pem"])
+    subprocess.run(["rm", "temp_mudfile.json", "temp_private_key.pem", "mudfile.sig"])
     return signature
 
 if __name__ == '__main__':
