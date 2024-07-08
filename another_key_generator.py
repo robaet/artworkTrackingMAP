@@ -28,9 +28,9 @@ def sign_file(data, private_key):
     
     return signature
 
-def verify_signature(data, signature, certificate):
-    with open(file_path, 'rb') as f:
-        data = f.read()
+def verify_signature(data, signature, certificate_path):
+    with open(certificate_path, 'rb') as f:
+        certificate = f.read()
     
     try:
         # Verify the signature using the public key from the certificate
