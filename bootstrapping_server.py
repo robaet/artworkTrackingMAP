@@ -26,10 +26,11 @@ def search_mud_file(device_id, mud_server_IP, certificate_path):
         if response.status_code == 200:
             data = json.loads(response.content.decode('utf-8'))
             mud = data["mud"]
+            print(mud)
             sig = bytes.fromhex(data["sig"])
             print(type(sig))
             print(type(certificate_path))
-            if not verify_signature(mud, sig, certificate_path):
+            if not verify_signature(json.dumps(mud).encode('utf-8'), sig, certificate_path):
                 print(f"MUD file retrieved for device ID {device_id} is invalid.")
             else:
                 enforce_ip_table(translate_to_iptables(parse_mud(mud)))
