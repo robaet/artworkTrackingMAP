@@ -10,7 +10,6 @@ from cryptography.hazmat.backends import default_backend
 app = Flask(__name__)
 
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145', '192.168.1.120', '188.61.197.109'}
-mud_server_IP = "http://127.0.0.1:5000" # IP address of the MUD server. Must be changed to the actual IP address of the MUD server!!!
 
 def is_valid_ip(ip_address):
     # check if the IP address is in the allowed set
@@ -38,6 +37,7 @@ def search_mud_file(device_id, mud_server_IP, public_key):
 #Endpoint to receive request from IOT device to retrieve MUD file
 @app.route('/mud/<device_id>', methods=['GET'])
 def retrieve_mud_file(device_id):
+    mud_server_IP = request.args.get('mud_server_url')
     if not is_valid_ip(request.remote_addr):
         return jsonify({'error': 'Unauthorized IP address'}), 403
     public_key = requests.get(f"{mud_server_IP}/pk")
