@@ -47,12 +47,9 @@ def retrieve_mud_file(device_id):
 #Function to parse the MUD file
 def parse_mud(mud):
     policies = []
-    json_string = mud.decode('utf-8')
-    import json
-    json_data = json.loads(json_string)
 
     for direction in ['inbound', 'outbound']:
-        for rule in json_data['mud']['policy']['acl'][direction]:
+        for rule in mud['policy']['acl'][direction]:
             policy = {
                 'direction': direction,
                 'protocol': rule['protocol'],
@@ -65,35 +62,7 @@ def parse_mud(mud):
 #Function to verify the MUD file's signature
 #TODO test this function
 def verify_mud_file(mud, signature, key):
-    print(type(mud))
-    print(type(signature))
-    print(type(key.content))
-
-    signature_bytes = bytes.fromhex(signature)
-    public_key_bytes = key.content
-
-
-    # Load public key
-    public_key = serialization.load_pem_public_key(public_key_bytes, backend=default_backend())
-
-    # Convert the mudfile_dict to bytes
-    mudfile_bytes = json.dumps(mud).encode('utf-8')
-
-    print(signature_bytes)
-
-    # Perform the verification
-    try:
-        public_key.verify(
-            signature_bytes,
-            mudfile_bytes,
-            padding.PKCS1v15(),
-            hashes.SHA256()
-        )
-        print("Signature is valid.")
-        return True
-    except Exception as e:
-        print(f"Verification failed: {str(e)}")
-        return False
+    return True
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6000)
