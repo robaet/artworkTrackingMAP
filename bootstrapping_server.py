@@ -2,15 +2,11 @@ from flask import Flask, request, jsonify
 from rule_enforcement import translate_to_iptables, enforce_ip_table
 import requests
 import json
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 
 app = Flask(__name__)
 
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145', '192.168.1.120'}
-mud_server_IP = "http://127.0.0.1:5000" # IP address of the MUD server. Must be changed to the actual IP address of the MUD server!!!
+mud_server_IP = "https://13.60.50.15 " # IP address of the MUD server. Must be changed to the actual IP address of the MUD server!!!
 
 def is_valid_ip(ip_address):
     # check if the IP address is in the allowed set
