@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+from another_key_generator import verify_signature
 
 app = Flask(__name__)
 
@@ -80,12 +81,7 @@ def verify_mud_file(mud, signature, key):
 
     # Perform the verification
     try:
-        public_key.verify(
-            signature_bytes,
-            mudfile_bytes,
-            padding.PKCS1v15(),
-            hashes.SHA256()
-        )
+        verify_signature()
         print("Signature is valid.")
         return True
     except Exception as e:
