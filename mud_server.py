@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from key_generator import generate_keys
+from another_key_generator import generate_key_pair, sign_file
 import json
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -26,7 +26,7 @@ class Inventory:
 inventory = Inventory()
 
 #TODO make reasonably safe
-key_pair = generate_keys()
+private_key, certificate = generate_key_pair()
 
 #Sample device MUD file in JSON format. This MUD file (if enforced correctly) would allow the IoT device to accept inbound HTTP and HTTPS
 device_mud = {
@@ -71,6 +71,7 @@ def retrieve_mud(device_id):
     if mud:
         print(f"MUD file found for device ID {device_id}")
         mud_sig = sign_mudfile(mud, key_pair[0])
+        signature = sign_file(file_path, private_key)
         return {"mud": device_mud, "sig": mud_sig.hex()}, 200
     else:
         inventory.store_mud(device_id, device_mud)
