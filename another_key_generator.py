@@ -18,20 +18,21 @@ def generate_key_pair():
     
     return key, cert
 
-def sign_file(file_path, private_key):
-    with open(file_path, 'rb') as f:
+def sign_file(data, private_key):
+    '''with open(file_path, 'rb') as f:
         data = f.read()
-    
+    '''
     # Create a signature using the private key
     #signature = cryptography.hazmat.primitives.asymmetric.rsa.generate_private_key(private_key, data, 'sha256')
     signature = crypto.sign(private_key, data, 'sha256')
     
     return signature
 
-def verify_signature(file_path, signature, certificate):
-    with open(file_path, 'rb') as f:
+def verify_signature(data, signature, certificate):
+    '''with open(file_path, 'rb') as f:
         data = f.read()
     data = "A message for signing2"
+    '''
     try:
         # Verify the signature using the public key from the certificate
         crypto.verify(certificate, signature, data, 'sha256')

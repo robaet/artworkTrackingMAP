@@ -70,14 +70,16 @@ def retrieve_mud(device_id):
     mud = inventory.get_mud(device_id)
     if mud:
         print(f"MUD file found for device ID {device_id}")
-        mud_sig = sign_mudfile(mud, key_pair[0])
-        signature = sign_file(file_path, private_key)
-        return {"mud": device_mud, "sig": mud_sig.hex()}, 200
+        #mud_sig = sign_mudfile(mud, key_pair[0])
+        signature = sign_file(mud, private_key)
+        return {"mud": device_mud, "sig": signature}, 200
     else:
         inventory.store_mud(device_id, device_mud)
         print(f"sample MUD file used for device ID {device_id}")
-        mud_sig = sign_mudfile(device_mud, key_pair[0])
-        return {"mud": device_mud, "sig": mud_sig.hex()}, 200
+        #mud_sig = sign_mudfile(device_mud, key_pair[0])
+        mud = "test"
+        signature = sign_file(mud, private_key)
+        return {"mud": device_mud, "sig": signature}, 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
 @app.route('/mud/<device_id>', methods=['POST'])
@@ -95,18 +97,19 @@ def post_mud(device_id):
     return jsonify(response), 200
 
 #Endpoint to retrieve the public key of the server
-@app.route('/pk', methods=['GET'])
-def retrieve_public_key():
-    pk = key_pair[1]
+@app.route('/certificate', methods=['GET'])
+def retrieve_certificate():
+    pk = certificate
     if pk:
-        print(f"found public key {pk}")
+        print(f"found certificate {pk}")
         return pk, 200
     else:
-        print(f"no public key found")
-        return jsonify({'error': 'public key not found'}), 404
+        print(f"no certificate found")
+        return jsonify({'error': 'certificate not found'}), 404
 
 #Function to sign the MUD file
 #TODO test this function
+@DeprecationWarning
 def sign_mudfile(mud, pk):
     # Load private key
     private_key = load_pem_private_key(pk, password=None, backend=default_backend())
