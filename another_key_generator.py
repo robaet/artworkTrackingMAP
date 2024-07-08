@@ -30,8 +30,11 @@ def sign_file(data, private_key):
 
 def verify_signature(data, signature, certificate_path):
     with open(certificate_path, 'rb') as f:
-        certificate = f.read()
-    
+        pem_data = f.read()
+    certificate = crypto.load_certificate(crypto.FILETYPE_PEM, pem_data)
+    print("lululululu")
+    print(type(certificate))
+    print(type(signature))
     try:
         # Verify the signature using the public key from the certificate
         crypto.verify(certificate, signature, data, 'sha256')
@@ -40,11 +43,3 @@ def verify_signature(data, signature, certificate_path):
     except crypto.Error:
         print("Signature verification failed")
         return False
-
-private_key, certificate = generate_key_pair()
-
-file_path = 'signthis.txt'
-signature = sign_file(file_path, private_key)
-
-is_valid = verify_signature(file_path, signature, certificate)
-print("Signature valid:", is_valid)

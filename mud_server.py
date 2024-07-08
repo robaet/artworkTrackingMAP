@@ -73,6 +73,8 @@ def retrieve_mud(device_id):
         print(f"MUD file found for device ID {device_id}")
         #mud_sig = sign_mudfile(mud, key_pair[0])
         signature = sign_file(mud, private_key)
+        print("wenfiopwenfionweipfnipwefnhiw")
+        print(type(signature))
         return {"mud": device_mud, "sig": signature.hex()}, 200
     else:
         inventory.store_mud(device_id, device_mud)
@@ -80,6 +82,8 @@ def retrieve_mud(device_id):
         #mud_sig = sign_mudfile(device_mud, key_pair[0])
         mud = "test"
         signature = sign_file(mud, private_key)
+        print("wenfiopwenfionweipfnipwefnhiw")
+        print(type(signature))
         return {"mud": device_mud, "sig": signature.hex()}, 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
@@ -103,6 +107,7 @@ def retrieve_certificate():
     print("here?")
     pk = certificate
     print("after?")
+    print(type(certificate))
     if pk:
         print(f"found certificate {pk}")
         cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
