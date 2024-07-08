@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from another_key_generator import generate_key_pair, sign_file
 import json
 from cryptography.hazmat.primitives import hashes
@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import utils
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from OpenSSL import crypto
 
 app = Flask(__name__)
 
@@ -79,7 +80,8 @@ def retrieve_mud(device_id):
         #mud_sig = sign_mudfile(device_mud, key_pair[0])
         mud = "test"
         signature = sign_file(mud, private_key)
-        return {"mud": device_mud, "sig": signature}, 200
+        decoded_signature = signature.decode('utf-8')
+        return {"mud": device_mud, "sig": decoded_signature}, 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
 @app.route('/mud/<device_id>', methods=['POST'])
@@ -99,10 +101,15 @@ def post_mud(device_id):
 #Endpoint to retrieve the public key of the server
 @app.route('/certificate', methods=['GET'])
 def retrieve_certificate():
+    print("here?")
     pk = certificate
+    print("after?")
     if pk:
         print(f"found certificate {pk}")
-        return pk, 200
+        cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
+        response = make_response(cert_pem)
+        response.headers['Content-Type'] = '"application/pkcs7-signature"'
+        return response, 200
     else:
         print(f"no certificate found")
         return jsonify({'error': 'certificate not found'}), 404

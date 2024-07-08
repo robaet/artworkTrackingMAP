@@ -29,15 +29,16 @@ def sign_file(data, private_key):
     return signature
 
 def verify_signature(data, signature, certificate):
-    '''with open(file_path, 'rb') as f:
+    with open(file_path, 'rb') as f:
         data = f.read()
-    data = "A message for signing2"
-    '''
+    
     try:
         # Verify the signature using the public key from the certificate
         crypto.verify(certificate, signature, data, 'sha256')
+        print("Signature verified")
         return True
     except crypto.Error:
+        print("Signature verification failed")
         return False
 
 private_key, certificate = generate_key_pair()

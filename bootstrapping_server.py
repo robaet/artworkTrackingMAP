@@ -26,7 +26,7 @@ def search_mud_file(device_id, mud_server_IP, certificate):
         if response.status_code == 200:
             data = json.loads(response.content.decode('utf-8'))
             mud = data["mud"]
-            sig = data["sig"]
+            sig = data["sig"].encode('utf-8')
             if not verify_signature(mud, sig, certificate):
                 print(f"MUD file retrieved for device ID {device_id} is invalid.")
             else:
@@ -41,7 +41,11 @@ def search_mud_file(device_id, mud_server_IP, certificate):
 def retrieve_mud_file(device_id):
     if not is_valid_ip(request.remote_addr):
         return jsonify({'error': 'Unauthorized IP address'}), 403
-    certificate = requests.get(f"{mud_server_IP}/certificate")
+    response = requests.get(f"{mud_server_IP}/certificate")
+    certificate = 'downloaded_certificate.pem'
+    with open(certificate, 'wb') as f:
+        f.write(response.content)
+        print(f"Certificate saved to {certificate}")
     search_mud_file(device_id, mud_server_IP, certificate)
     return jsonify({'message': 'MUD file retrieval request sent to MUD server'}), 200
 
