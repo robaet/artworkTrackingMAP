@@ -1,3 +1,3 @@
 
 def generate_keys():
-    return 1, 2
+    return "1", "2"
