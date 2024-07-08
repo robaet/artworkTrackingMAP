@@ -32,7 +32,7 @@ device_mud = {
         'last_update': "2019-04-17T09:47:00+00:00",
         'policy': {
             'acl': {
-                'inbound': [
+                'input': [
                     {
                         'name': 'allow_http',
                         'protocol': 'tcp',
@@ -40,7 +40,7 @@ device_mud = {
                         'action': 'allow'
                     }
                 ],
-                'outbound': [
+                'output': [
                     {
                         'name': 'allow_http',
                         'protocol': 'tcp',

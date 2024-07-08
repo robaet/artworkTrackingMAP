@@ -6,7 +6,7 @@ import json
 app = Flask(__name__)
 
 ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145', '192.168.1.120', '188.61.197.109'}
-mud_server_IP = "http://13.60.50.15:5000" # IP address of the MUD server. Must be changed to the actual IP address of the MUD server!!!
+mud_server_IP = "http://13.53.144.178:5000" # IP address of the MUD server. Must be changed to the actual IP address of the MUD server!!!
 
 def is_valid_ip(ip_address):
     # check if the IP address is in the allowed set
@@ -44,7 +44,7 @@ def retrieve_mud_file(device_id):
 def parse_mud(mud):
     policies = []
 
-    for direction in ['inbound', 'outbound']:
+    for direction in ['input', 'output']:
         for rule in mud['policy']['acl'][direction]:
             policy = {
                 'direction': direction,
