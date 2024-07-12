@@ -74,9 +74,6 @@ def retrieve_mud(device_id):
         #mud_sig = sign_mudfile(mud, key_pair[0])
         mud2 = json.loads(json.dumps(mud, sort_keys=True))
         signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
-        print(mud2)
-        print("wenfiopwenfionweipfnipwefnhiw")
-        print(type(signature))
 
         return {"mud": mud2, "sig": signature.hex()}, 200
     else:
@@ -85,9 +82,6 @@ def retrieve_mud(device_id):
         #mud_sig = sign_mudfile(device_mud, key_pair[0])
         mud2 = json.loads(json.dumps(device_mud, sort_keys=True))
         signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
-        print(mud2)
-        print("wenfiopwenfionweipfnipwefnhiw")
-        print(type(signature))
         return {"mud": mud2, "sig": signature.hex()}, 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
@@ -108,10 +102,7 @@ def post_mud(device_id):
 #Endpoint to retrieve the public key of the server
 @app.route('/certificate', methods=['GET'])
 def retrieve_certificate():
-    print("here?")
     pk = certificate
-    print("after?")
-    print(type(certificate))
     if pk:
         print(f"found certificate {pk}")
         cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')

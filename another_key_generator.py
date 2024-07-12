@@ -32,9 +32,6 @@ def verify_signature(data, signature, certificate_path):
     with open(certificate_path, 'rb') as f:
         pem_data = f.read()
     certificate = crypto.load_certificate(crypto.FILETYPE_PEM, pem_data)
-    print("lululululu")
-    print(type(certificate))
-    print(type(signature))
     try:
         # Verify the signature using the public key from the certificate
         crypto.verify(certificate, signature, data, 'sha256')
