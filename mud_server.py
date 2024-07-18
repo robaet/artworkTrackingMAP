@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from another_key_generator import generate_key_pair, sign_file
 import json
 from cryptography.hazmat.primitives import hashes
@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import utils
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from OpenSSL import crypto
 
 app = Flask(__name__)
 
@@ -70,14 +71,18 @@ def retrieve_mud(device_id):
     mud = inventory.get_mud(device_id)
     if mud:
         print(f"MUD file found for device ID {device_id}")
-        mud_sig = sign_mudfile(mud, key_pair[0])
-        signature = sign_file(file_path, private_key)
-        return {"mud": device_mud, "sig": mud_sig.hex()}, 200
+        #mud_sig = sign_mudfile(mud, key_pair[0])
+        mud2 = json.loads(json.dumps(mud, sort_keys=True))
+        signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
+
+        return {"mud": mud2, "sig": signature.hex()}, 200
     else:
         inventory.store_mud(device_id, device_mud)
         print(f"sample MUD file used for device ID {device_id}")
-        mud_sig = sign_mudfile(device_mud, key_pair[0])
-        return {"mud": device_mud, "sig": mud_sig.hex()}, 200
+        #mud_sig = sign_mudfile(device_mud, key_pair[0])
+        mud2 = json.loads(json.dumps(device_mud, sort_keys=True))
+        signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
+        return {"mud": mud2, "sig": signature.hex()}, 200
     
 #Endpoint to add a MUD file to the inventory from outside the server   
 @app.route('/mud/<device_id>', methods=['POST'])
@@ -95,18 +100,22 @@ def post_mud(device_id):
     return jsonify(response), 200
 
 #Endpoint to retrieve the public key of the server
-@app.route('/pk', methods=['GET'])
-def retrieve_public_key():
-    pk = key_pair[1]
+@app.route('/certificate', methods=['GET'])
+def retrieve_certificate():
+    pk = certificate
     if pk:
-        print(f"found public key {pk}")
-        return pk, 200
+        print(f"found certificate {pk}")
+        cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
+        response = make_response(cert_pem)
+        response.headers['Content-Type'] = '"application/pkcs7-signature"'
+        return response, 200
     else:
-        print(f"no public key found")
-        return jsonify({'error': 'public key not found'}), 404
+        print(f"no certificate found")
+        return jsonify({'error': 'certificate not found'}), 404
 
 #Function to sign the MUD file
 #TODO test this function
+@DeprecationWarning
 def sign_mudfile(mud, pk):
     # Load private key
     private_key = load_pem_private_key(pk, password=None, backend=default_backend())
