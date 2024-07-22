@@ -12,6 +12,14 @@ module ietf-mud {
      import ietf-inet-types {
        prefix inet;
      }
+
+     organization
+      "Author: Some Dude";
+  
+     contact
+      "Author: Yves Meister yves.meister@uzh.ch,
+      Robin Bättig robin.baettig@uzh.ch";
+     
      description
        "This is a yang model for a mud file.";
 
@@ -89,7 +97,7 @@ module ietf-mud {
          description
            "The information retrieved from the MUD server is
             valid for these many hours, after which it should
-be refreshed.  N.B., MUD manager implementations
+            be refreshed.  N.B., MUD manager implementations
             need not discard MUD files beyond this period.";
        }
        leaf is-supported {
@@ -137,7 +145,7 @@ be refreshed.  N.B., MUD manager implementations
             updated but the MUD URL cannot.";
        }
        leaf documentation {
-type inet:uri;
+          type inet:uri;
          description
            "This URL points to documentation that
             relates to this device and any classes that it uses
