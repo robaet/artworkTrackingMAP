@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <mud xmlns="urn:ietf:params:xml:ns:yang:ietf-mud">
+    <mud-version/>
+    <mud-url/>
+    <last-update/>
+    <mud-signature/>
+    <cache-validity>48</cache-validity>
+    <is-supported/>
+    <systeminfo/>
+    <mfg-name/>
+    <model-name/>
+    <firmware-rev/>
+    <software-rev/>
+    <documentation/>
+    <extensions>
+      <!-- # entries: 0.. -->
+    </extensions>
+    <from-device-policy>
+      <access-lists>
+        <access-list>
+          <name>
+          allow_http
+          </name>
+        </access-list>
+      </access-lists>
+    </from-device-policy>
+    <to-device-policy>
+      <access-lists>
+        <access-list>
+          <name>
+          allow_http
+          </name>
+        </access-list>
+      </access-lists>
+    </to-device-policy>
+    <ietf-access-control-list:acls>
+    <acl>
+      <name>allow_http</name>
+      <type>ipv4-acl-type</type>
+      <aces>
+        <ace>
+          <name>ace1</name>
+          <matches>
+            <ietf-acldns:dst-dnsname>www.example.com</ietf-acldns:dst-dnsname>
+          </matches>
+          <actions>
+            <forwarding>true</forwarding>
+          </actions>
+        </ace>
+      </aces>
+    </acl>
+    </ietf-access-control-list:acls>
+  </mud>
+</data>
