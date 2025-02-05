@@ -10,7 +10,7 @@ from OpenSSL import crypto
 
 app = Flask(__name__)
 
-ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145', '192.168.1.120'}
+ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.168.1.145', '192.168.1.120', '213.55.241.102'}
 
 #Class to store MUD files in the inventory
 class Inventory:
