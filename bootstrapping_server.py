@@ -28,6 +28,7 @@ ALLOWED_IPS = {'192.168.1.100', '10.0.0.1', '13.38.251.115', '127.0.0.1', '192.1
 def is_valid_ip(ip_address):
     # check if the IP address is in the allowed set
     return ip_address in ALLOWED_IPS
+    # return True #For testing purposes, allow all IP addresses
 
 #Function to tell server to retrieve a MUD file for a device
 #Send a request to the MUD server with a device ID, also verifies the MUD file
@@ -62,6 +63,38 @@ def retrieve_mud_file(device_id):
     search_mud_file(device_id, mud_server_IP, certificate_path)
     inventory.set_devices(device_id)
     return jsonify({'message': 'MUD file retrieval request sent to MUD server'}), 200
+
+#Endpoint to receive sensor data from IOT device
+@app.route('/data/<device_id>', methods=['POST'])
+def receive_sensor_data(device_id):
+    if not is_valid_ip(request.remote_addr):
+        return jsonify({'error': 'Unauthorized IP address'}), 403
+    data = request.json
+    if data:
+        with open('sensor_data.txt', 'a') as file:
+            file.write(data + '\n')
+    print(f"Received data from device ID {device_id}: {data}")
+    return jsonify({'message': 'Data received'}), 200
+
+#Simple test endpoint to receive data
+@app.route('/', methods=['GET'])
+def log_sensor_data1():
+    print(f"Received GET request from Board")
+    return "GET received successfully.", 200
+
+#Simple test endpoint to receive data
+@app.route('/', methods=['POST'])
+def log_sensor_data2():
+    print(f"Received POST request from Board")
+    sensor_data = request.form.get('data')
+    print(f"Received data from Board: {sensor_data}")
+    if sensor_data:
+        with open('sensor_data.txt', 'a') as file:
+            file.write(sensor_data + '\n')
+            print(f"Wrote data to sensor_data.txt")
+        return "Data logged successfully.", 200
+    else:
+        return "No data provided.", 400
 
 #Function to parse the MUD file
 def parse_mud(mud):
