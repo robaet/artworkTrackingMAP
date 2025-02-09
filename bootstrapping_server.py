@@ -6,6 +6,7 @@ from another_key_generator import verify_signature
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import socket
+import time
 
 app = Flask(__name__)
 class Inventory:
@@ -61,49 +62,6 @@ def retrieve_mud_file(device_id):
     inventory.set_devices(device_id)
     return jsonify({'message': 'MUD file retrieval request sent to MUD server'}), 200
 
-#Endpoint to receive sensor data from IOT device
-@app.route('/data/<device_id>', methods=['POST'])
-def receive_sensor_data(device_id):
-    if not is_valid_ip(request.remote_addr):
-        return jsonify({'error': 'Unauthorized IP address'}), 403
-    data = request.json
-    if data:
-        with open('sensor_data.txt', 'a') as file:
-            file.write(data + '\n')
-    print(f"Received data from device ID {device_id}: {data}")
-    return jsonify({'message': 'Data received'}), 200
-
-#Simple test endpoint to receive data
-@app.route('/', methods=['GET'])
-def log_sensor_data1():
-    print(f"Received GET request from Board")
-    return "GET received successfully.", 200
-
-#Simple test endpoint to receive data
-@app.route('/', methods=['POST'])
-def log_sensor_data2():
-    print(f"Received POST request from Board")
-    request.data = request.data.decode('utf-8')
-    request.data = json.loads(request.data)
-    print(f"Received data from Board: {request.data}")
-    time_data = request.data.get('time')
-    temperature_data = request.data.get('temperature')
-    humidity_data = request.data.get('humidity')
-    accel_data = request.data.get('acceleration')
-    print(f"Received time data from Board: {time_data}")
-    print(f"Received temperature data from Board: {temperature_data}")
-    print(f"Received humidity data from Board: {humidity_data}")
-    print(f"Received acceleration data from Board: {accel_data}")
-    if time_data and temperature_data and humidity_data and accel_data:
-        with open('sensor_data.txt', 'a') as file:
-            file.write(time_data + '!' + temperature_data + '\n')
-            file.write(time_data + '!' + humidity_data + '\n')
-            file.write(time_data + '!' + accel_data + '\n')
-            print(f"Wrote all data to sensor_data.txt")
-        return "All data logged successfully.", 200
-    else:
-        return "No data provided.", 400
-
 #Function to parse the MUD file
 def parse_mud(mud):
     policies = []
@@ -132,24 +90,49 @@ def dataHandlerSocket():
     print("Starting data handler server...")
     HOST = '0.0.0.0'
     PORT = 5000
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-            server_socket.bind((HOST, PORT))
-            server_socket.listen(5) # 5 connections
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.bind((HOST, PORT))
+        server_socket.listen(5) # 5 connections
+        server_socket.settimeout(1.0)  # Timeout after 1 second
 
-            print(f"Server listening on {HOST}:{PORT}")
+        print(f"Server listening on {HOST}:{PORT}")
 
-            while True:
+        while True:
+            try:
                 conn, addr = server_socket.accept()
                 with conn:
                     print('Connected by', addr)
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    print('Received', repr(data))
-                    conn.sendall(data)
-    except KeyboardInterrupt:
-        print("\nServer stopped by user.")
+                    buffer = b"" 
+                    while True:
+                        data = conn.recv(1024)
+                        if not data:
+                            break
+                        buffer += data
+                        try:
+                            messages = buffer.decode('utf-8').split('}')
+                            # Re-add the closing bracket and process each JSON object
+                            for msg in messages[:-1]:
+                                if msg.strip():  # Ignore empty fragments
+                                    process_json_message(msg + '}')
+                            # Keep the incomplete part for the next round
+                            buffer = messages[-1].encode('utf-8')
+                        except UnicodeDecodeError:
+                            print("Received non-decodable bytes. Skipping.")
+                            buffer = b""
+            except socket.timeout:
+                pass 
+
+def process_json_message(message):
+    try:
+        data = json.loads(message)
+        print(f"Parsed JSON: {data}")
+        with open("sensor_data.txt", 'a') as file:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            file.write(f"{timestamp} - {str(data)}\n")
+            print("Data written: " + str(data))
+    except json.JSONDecodeError:
+        print(f"Invalid JSON received: {message}")
+
 
 if __name__ == '__main__':
     print("Starting bootstrapping server...")
