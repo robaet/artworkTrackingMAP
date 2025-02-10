@@ -149,11 +149,14 @@ if __name__ == '__main__':
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
 
-    #signal.signal(signal.SIGINT, serverShutdown)
-    #tcp_thread = threading.Thread(target=startTcpServer)
-    #flask_thread = threading.Thread(target=startHttpServer)
-    #tcp_thread.start()
-    #flask_thread.start()
+    signal.signal(signal.SIGINT, serverShutdown)
+    tcp_thread = threading.Thread(target=startTcpServer)
+    flask_thread = threading.Thread(target=startHttpServer)
+    tcp_thread.daemon = True
+    flask_thread.daemon = True
+    tcp_thread.start()
+    flask_thread.start()
     #tcp_thread.join()
     #flask_thread.join()
-    startTcpServer()
+    while True:
+        time.sleep(2)
