@@ -149,7 +149,7 @@ if __name__ == '__main__':
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
 
-    signal.signal(signal.SIGINT, serverShutdown)
+    #signal.signal(signal.SIGINT, serverShutdown)
     #tcp_thread = threading.Thread(target=startTcpServer)
     #flask_thread = threading.Thread(target=startHttpServer)
     #tcp_thread.start()
