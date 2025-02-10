@@ -8,6 +8,7 @@ import atexit
 import socket
 import time
 import threading
+import signal
 
 app = Flask(__name__)
 class Inventory:
@@ -137,6 +138,9 @@ def process_json_message(message):
 def startHttpServer():
     app.run(host='0.0.0.0', port=6000)
 
+def serverShutdown():
+    print("Manual shutdown...")
+    exit(0)
 
 if __name__ == '__main__':
     print("Starting bootstrapping server...")
@@ -145,6 +149,7 @@ if __name__ == '__main__':
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
 
+    signal.signal(signal.SIGINT, serverShutdown)
     tcp_thread = threading.Thread(target=startTcpServer)
     flask_thread = threading.Thread(target=startHttpServer)
     tcp_thread.start()
