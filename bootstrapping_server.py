@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import socket
 import time
+import threading
 
 app = Flask(__name__)
 class Inventory:
@@ -86,8 +87,8 @@ def updatePolicies():
         else:
             print(f"Failed to update policies for device ID {device_id}. HTTP status code: {response.status_code}")
 
-def dataHandlerSocket():
-    print("Starting data handler server...")
+def startTcpServer():
+    print("Starting data handler port...")
     HOST = '0.0.0.0'
     PORT = 5000
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
@@ -133,12 +134,20 @@ def process_json_message(message):
     except json.JSONDecodeError:
         print(f"Invalid JSON received: {message}")
 
+def startHttpServer():
+    app.run(host='0.0.0.0', port=6000)
+
 
 if __name__ == '__main__':
     print("Starting bootstrapping server...")
-    dataHandlerSocket()
     scheduler = BackgroundScheduler()
     job = scheduler.add_job(updatePolicies, 'interval', seconds=10)
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
-    app.run(host='0.0.0.0', port=6000)
+
+    tcp_thread = threading.Thread(target=startTcpServer)
+    flask_thread = threading.Thread(target=startHttpServer)
+    tcp_thread.start()
+    flask_thread.start()
+    tcp_thread.join()
+    flask_thread.join()
