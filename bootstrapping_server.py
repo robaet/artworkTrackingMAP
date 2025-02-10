@@ -102,27 +102,27 @@ def startTcpServer():
         while True:
             try:
                 conn, addr = server_socket.accept()
-                with conn:
-                    print('Connected by', addr)
-                    buffer = b"" 
-                    while True:
-                        data = conn.recv(1024)
-                        if not data:
-                            break
-                        buffer += data
-                        try:
-                            messages = buffer.decode('utf-8').split('}')
-                            # Re-add the closing bracket and process each JSON object
-                            for msg in messages[:-1]:
-                                if msg.strip():  # Ignore empty fragments
-                                    process_json_message(msg + '}')
-                            # Keep the incomplete part for the next round
-                            buffer = messages[-1].encode('utf-8')
-                        except UnicodeDecodeError:
-                            print("Received non-decodable bytes. Skipping.")
-                            buffer = b""
             except socket.timeout:
-                pass 
+                continue 
+            with conn:
+                print('Connected by', addr)
+                buffer = b"" 
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    buffer += data
+                    try:
+                        messages = buffer.decode('utf-8').split('}')
+                        # Re-add the closing bracket and process each JSON object
+                        for msg in messages[:-1]:
+                            if msg.strip():  # Ignore empty fragments
+                                process_json_message(msg + '}')
+                        # Keep the incomplete part for the next round
+                        buffer = messages[-1].encode('utf-8')
+                    except UnicodeDecodeError:
+                        print("Received non-decodable bytes. Skipping.")
+                        buffer = b""
 
 def process_json_message(message):
     try:
@@ -138,7 +138,7 @@ def process_json_message(message):
 def startHttpServer():
     app.run(host='0.0.0.0', port=6000)
 
-def serverShutdown():
+def serverShutdown(sig, frame):
     print("Manual shutdown...")
     exit(0)
 
@@ -150,9 +150,10 @@ if __name__ == '__main__':
     atexit.register(lambda: scheduler.shutdown())
 
     signal.signal(signal.SIGINT, serverShutdown)
-    tcp_thread = threading.Thread(target=startTcpServer)
-    flask_thread = threading.Thread(target=startHttpServer)
-    tcp_thread.start()
-    flask_thread.start()
-    tcp_thread.join()
-    flask_thread.join()
+    #tcp_thread = threading.Thread(target=startTcpServer)
+    #flask_thread = threading.Thread(target=startHttpServer)
+    #tcp_thread.start()
+    #flask_thread.start()
+    #tcp_thread.join()
+    #flask_thread.join()
+    startTcpServer()
