@@ -68,17 +68,35 @@ def retrieve_mud_file(device_id):
 #Function to parse the MUD file
 def parse_mud(mud):
     policies = []
+    acl = mud['policy']['acl']
 
-    for direction in ['input', 'output']:
-        for rule in mud['policy']['acl'][direction]:
+    for direction, rules in acl.items():
+        for rule in rules:
             policy = {
                 'direction': direction,
                 'protocol': rule['protocol'],
-                'ports': rule['src-port'],
+                'src-ports': rule.get('src-port', []),
+                'dst-ports': rule.get('dst-port', []),  # Use get() in case dst-port is missing
                 'action': rule['action']
             }
+
+            # Optional IP-based filtering
+            if 'src-ip' in rule:
+                policy['src-ip'] = rule['src-ip']
+            if 'dst-ip' in rule:
+                policy['dst-ip'] = rule['dst-ip']
+
             policies.append(policy)
     return policies
+
+
+def delete_all_rules():
+    try:
+        subprocess.run(['iptables', '-F'], check=True)
+        print("All iptables rules deleted.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error deleting iptables rules: {e}")
+
 
 def updatePolicies():    
     for device_id in inventory.get_devices():
@@ -102,11 +120,13 @@ def startTcpServer():
     print("Starting data handler port...")
     HOST = '0.0.0.0'
     PORT = 5000
-    
+    delete_all_rules()
+    print("#################       iptable rules BEFORE update       ###########\n\n" + get_current_iptables())
     with open("temp_mudfile.json", "r") as f:
         mud = json.load(f)
-    print(mud)
-    #enforce_ip_table(translate_to_iptables(parse_mud(mud)))
+    enforce_ip_table(translate_to_iptables(parse_mud(mud)), app)
+    print("#################       iptable rules AFTER update       ###########\n\n" + get_current_iptables())
+
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))

@@ -2,17 +2,53 @@ from flask import jsonify
 import subprocess
 
 
-def enforce_ip_table(ip_table):
-    for command in ip_table:
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
-    return jsonify({'message': 'IP tables rules enforced'}), 200
+def enforce_ip_table(ip_table, app):
+    with app.app_context():
+        for command in ip_table:
+            result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
+        return jsonify({'message': 'IP tables rules enforced'}), 200
 
-#Function to convert policies to iptables rules
 def translate_to_iptables(policies):
     iptables_rules = []
     for policy in policies:
-        for port in policy['ports']:
-            rule = f"sudo iptables -A {policy['direction'].upper()} -p {policy['protocol']} --dport {port} -j " + "ACCEPT" if {policy['action'].upper()=="allow"} else "DROP"
-            iptables_rules.append(rule)
+        src_ports = policy.get('src-ports', [])
+        dst_ports = policy.get('dst-ports', [])
+        
+        if not src_ports:
+            src_ports = [None]
+        if not dst_ports:
+            dst_ports = [None]
+        
+        for src_port in src_ports:
+            for dst_port in dst_ports:
+                action = policy['action'].upper()
+                if action == "ACCEPT":
+                    action = "ACCEPT"
+                elif action == "DROP":
+                    action = "DROP"
+                elif action == "REJECT":
+                    action = "REJECT --reject-with tcp-reset"
+                else:
+                    raise ValueError(f"Unknown action: {policy['action']}")
+                
+                rule = f"sudo iptables -A {policy['direction'].upper()} -p {policy['protocol']} "
+                
+                if src_port is not None:
+                    rule += f"--sport {src_port} "
+                
+                if dst_port is not None:
+                    rule += f"--dport {dst_port} "
+                
+                rule += f"-j {action}"
+                
+                if 'src-ip' in policy:
+                    rule += f" -s {policy['src-ip']}"
+                
+                if 'dst-ip' in policy:
+                    rule += f" -d {policy['dst-ip']}"
+                
+                iptables_rules.append(rule)
+
     return iptables_rules
+
