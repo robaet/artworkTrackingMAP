@@ -9,6 +9,7 @@ import socket
 import time
 import threading
 import signal
+import subprocess
 
 app = Flask(__name__)
 class Inventory:
@@ -88,10 +89,25 @@ def updatePolicies():
         else:
             print(f"Failed to update policies for device ID {device_id}. HTTP status code: {response.status_code}")
 
+def get_current_iptables():
+    try:
+        result = subprocess.run(['iptables', '-L', '-n', '-v'], capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        return f"Error running iptables: {e.stderr}"
+    except FileNotFoundError:
+        return "iptables command not found. Are you sure it's installed on your system?"
+
 def startTcpServer():
     print("Starting data handler port...")
     HOST = '0.0.0.0'
     PORT = 5000
+    
+    with open("temp_mudfile.json", "r") as f:
+        mud = json.load(f)
+    print(mud)
+    #enforce_ip_table(translate_to_iptables(parse_mud(mud)))
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
         server_socket.listen(5) # 5 connections
@@ -114,6 +130,7 @@ def startTcpServer():
                     buffer += data
                     try:
                         messages = buffer.decode('utf-8').split('}')
+                        print(messages)
                         # Re-add the closing bracket and process each JSON object
                         for msg in messages[:-1]:
                             if msg.strip():  # Ignore empty fragments
@@ -156,7 +173,7 @@ if __name__ == '__main__':
     flask_thread.daemon = True
     tcp_thread.start()
     flask_thread.start()
-    #tcp_thread.join()
-    #flask_thread.join()
+    tcp_thread.join()
+    flask_thread.join()
     while True:
         time.sleep(2)
