@@ -1,5 +1,5 @@
 Middlewares/Third_Party/FreeRTOS/event_groups.o: \
- C:/dev/DEMO-CERTIFY-BOOTSTRAPPING-V2/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
+ D:/Github/artworkTrackingMAP/demobootstrapping/DEMO-CERTIFY-BOOTSTRAPPING-V2/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
  ../../../../../../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../../../STM32_Cellular/App/FreeRTOSConfig.h \
  ../../../STM32_Cellular/App/plf_thread_config.h \

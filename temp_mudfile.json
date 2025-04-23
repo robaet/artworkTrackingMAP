@@ -4,9 +4,10 @@
         "acl": 
             {
                 "input": [
-                    {"name": "allow_http", "protocol": "udp", "dst-port": [80, 443], "src-ip": "192.168.1.50", "action": "drop"},
-                    {"name": "allow_http", "protocol": "tcp", "dst-port": [5000], "action": "reject"}, 
-                    {"name": "allow_http", "protocol": "tcp", "dst-port": [6000], "action": "ACCEPT"}
+                    {"name": "allow_http", "protocol": "tcp", "dst-port": [22], "action": "ACCEPT"},
+                    {"name": "allow_http", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT"},
+                    {"name": "allow_http", "protocol": "tcp", "action": "reject"},
+                    {"name": "allow_http", "protocol": "tcp", "dst-port": [1234], "src-ip": "192.168.1.50", "action": "drop"}
                 ]
             }
     }

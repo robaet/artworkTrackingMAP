@@ -1,3 +1,0 @@
-C:/Dev/DEMO-CERTIFY-BOOTSTRAPPING/Projects/B_L462E/Demonstrations/Cellular/Core/Src/rtc.c:30:6:MX_RTC_Init	8	static
-C:/Dev/DEMO-CERTIFY-BOOTSTRAPPING/Projects/B_L462E/Demonstrations/Cellular/Core/Src/rtc.c:50:6:HAL_RTC_MspInit	16	static
-C:/Dev/DEMO-CERTIFY-BOOTSTRAPPING/Projects/B_L462E/Demonstrations/Cellular/Core/Src/rtc.c:66:6:HAL_RTC_MspDeInit	16	static

@@ -95,8 +95,8 @@ all: main-build
 main-build: Prj_Murata_L462.elf secondary-outputs
 
 # Tool invocations
-Prj_Murata_L462.elf Prj_Murata_L462.map: $(OBJS) $(USER_OBJS) C:\dev\DEMO-CERTIFY-BOOTSTRAPPING-V2\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\STM32L462RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Prj_Murata_L462.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\dev\DEMO-CERTIFY-BOOTSTRAPPING-V2\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\STM32L462RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Prj_Murata_L462.map" -Wl,--gc-sections -static -u_printf_float  -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Prj_Murata_L462.elf Prj_Murata_L462.map: $(OBJS) $(USER_OBJS) D:\Github\artworkTrackingMAP\demobootstrapping\DEMO-CERTIFY-BOOTSTRAPPING-V2\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\STM32L462RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Prj_Murata_L462.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Github\artworkTrackingMAP\demobootstrapping\DEMO-CERTIFY-BOOTSTRAPPING-V2\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\STM32L462RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Prj_Murata_L462.map" -Wl,--gc-sections -static -u_printf_float  -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
