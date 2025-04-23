@@ -4,6 +4,7 @@ import requests
 import json
 from another_key_generator import verify_signature
 from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
 import atexit
 import socket
 import time
@@ -142,15 +143,21 @@ def startTcpServer():
                         buffer = b""
 
 def process_json_message(message):
-    try:
-        data = json.loads(message)
-        print(f"Parsed JSON: {data}")
-        with open("sensor_data.txt", 'a') as file:
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            file.write(f"{timestamp} - {str(data)}\n")
-            print("Data written: " + str(data))
-    except json.JSONDecodeError:
-        print(f"Invalid JSON received: {message}")
+    data_points = json.loads(message)
+    print(f"Parsed JSON buffer: {data_points}")
+    data_points = sorted(data_points, key=lambda x: int(x['time']))
+    latest_time = int(data_points[-1]['time'])
+    current_rtc = datetime.now()
+    for point in data_points:
+        delta_ms = latest_time - int(point['time'])
+        point_rtc = current_rtc - timedelta(milliseconds=delta_ms)
+        point['rtc_timestamp'] = point_rtc.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+    with open("sensor_data.txt", 'a') as file:
+        for point in data_points:
+            file.write(json.dumps(point) + '\n')
+            print("Data written:", point)
+
 
 def startHttpServer():
     app.run(host='0.0.0.0', port=6000)
