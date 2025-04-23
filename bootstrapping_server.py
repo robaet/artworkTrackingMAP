@@ -152,20 +152,22 @@ def startTcpServer():
                     try:
                         messages = buffer.decode('utf-8').split('}')
                         print(messages)
-                        # Re-add the closing bracket and process each JSON object
-                        for msg in messages[:-1]:
-                            if msg.strip():  # Ignore empty fragments
-                                process_json_message(msg + '}')
-                        # Keep the incomplete part for the next round
+                        process_json_message(messages)
                         buffer = messages[-1].encode('utf-8')
                     except UnicodeDecodeError:
                         print("Received non-decodable bytes. Skipping.")
                         buffer = b""
 
 def process_json_message(message):
-    data_points = json.loads(message)
-    print(f"Parsed JSON buffer: {data_points}")
-    data_points = sorted(data_points, key=lambda x: int(x['time']))
+    data_points = []
+    for msg in message:
+        try:
+            data_points.append(json.loads(msg + '}'))
+        except json.JSONDecodeError:
+            print("JSON decode error. Skipping message:", msg)
+            continue
+    print("Received message:", message)
+    print("Received data:", data_points)
     latest_time = int(data_points[-1]['time'])
     current_rtc = datetime.now()
     for point in data_points:
