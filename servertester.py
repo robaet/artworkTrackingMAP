@@ -20,11 +20,13 @@ import threading
 import signal
 
 # Server details
-HOST = '51.21.167.114'  # Localhost
-PORT = 5000        # Make sure this matches your server's port
+HOST = '192.168.1.112'  # Localhost
+PORT = 4000        # Make sure this matches your server's port
 
 # Message to send
-data = '{"yves":"funf", "time": "1000001","temperature": "20C","humidity": "17%","acceleration": "[2, 3, 4]"}'
+data = '{"yves":"funf", "time": "1000001","temperature": "20C","humidity": "17%","acceleration": "[2, 3, 4]"}' \
+'{"yves":"funf", "time": "1000001","temperature": "20C","humidity": "17%","acceleration": "[2, 3, 4]"}'
+data = "http://51.20.6.73:6000/certificate"
 
 def ping_server():
 

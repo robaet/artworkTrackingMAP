@@ -4,7 +4,9 @@
         "acl": 
             {
                 "input": [
-                    {"name": "allow_http", "protocol": "tcp", "dst-port": [1234], "src-ip": "192.168.1.50", "action": "drop"}
+                    {"name": "reject_all_tcp", "protocol": "tcp", "action": "accept"},
+                    {"name": "allow_tcp_ssh", "protocol": "tcp", "dst-port": [22], "action": "ACCEPT"},
+                    {"name": "allow_tcp_mudlink", "protocol": "tcp", "dst-port": [4000], "action": "ACCEPT"}
                 ]
             }
     }

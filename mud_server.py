@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import utils
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from OpenSSL import crypto
+import signal
 
 app = Flask(__name__)
 
@@ -58,6 +59,21 @@ device_mud = {
             }
         }
     }
+#todo maybe die spezifisch IP vom board dri tue
+device_mud = {
+"name": "Sample MUD Profile", "manufacturer": "Example", "model": "ABC123", "cache-validity": 48, "mud_url": "http://example.com/mud-files/ABC123", "last_update": "2019-04-17T09:47:00+00:00", 
+ "policy": 
+    {
+        "acl": 
+            {
+                "input": [
+                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT"},
+                ]
+            }
+    }
+}
+inventory.store_mud(1, device_mud)
+
 
 #Function to check if the IP address is in the allowed set
 def is_valid_ip(ip_address):
@@ -67,7 +83,7 @@ def is_valid_ip(ip_address):
 #Endpoint to retrieve MUD file for a specific device
 #If the MUD file is not found in the inventory, the server just use the sample device MUD file for now
 @app.route('/mud/<device_id>', methods=['GET'])
-def retrieve_mud(device_id):
+def get_mudfile(device_id):
     mud = inventory.get_mud(device_id)
     if mud:
         print(f"MUD file found for device ID {device_id}")
@@ -103,11 +119,15 @@ def post_mud(device_id):
 @app.route('/certificate', methods=['GET'])
 def retrieve_certificate():
     pk = certificate
+    print(f"certificate: {pk}")
     if pk:
         print(f"found certificate {pk}")
         cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
         response = make_response(cert_pem)
         response.headers['Content-Type'] = '"application/pkcs7-signature"'
+        device_id = "123"  # TODO: make this dynamic
+        response.headers['mudfile_url'] = f'/mud/{device_id}'
+        response.headers['device_id'] = device_id
         return response, 200
     else:
         print(f"no certificate found")
@@ -139,6 +159,14 @@ def sign_mudfile(mud, pk):
     )
 
     return signature
+
+def serverShutdown(sig, frame):
+    print("Manual shutdown...")
+    exit(0)
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    print(private_key)
+    print(certificate)
+    app.run(host='0.0.0.0', port=6000)
+
+    signal.signal(signal.SIGINT, serverShutdown)

@@ -2,12 +2,11 @@ from flask import jsonify
 import subprocess
 
 
-def enforce_ip_table(ip_table, app):
-    with app.app_context():
-        for command in ip_table:
-            result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
-        return jsonify({'message': 'IP tables rules enforced'}), 200
+def enforce_ip_table(ip_table):
+    for command in ip_table:
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
+    return {'message': 'IP tables rules enforced'}
 
 def translate_to_iptables(policies):
     iptables_rules = []
@@ -32,7 +31,7 @@ def translate_to_iptables(policies):
                 else:
                     raise ValueError(f"Unknown action: {policy['action']}")
                 
-                rule = f"sudo iptables -A {policy['direction'].upper()} -p {policy['protocol']} "
+                rule = f"sudo iptables -I {policy['direction'].upper()} -p {policy['protocol']} "
                 
                 if src_port is not None:
                     rule += f"--sport {src_port} "
@@ -49,6 +48,6 @@ def translate_to_iptables(policies):
                     rule += f" -d {policy['dst-ip']}"
                 
                 iptables_rules.append(rule)
-
+    print("ip table rules: " + str(iptables_rules))
     return iptables_rules
 
