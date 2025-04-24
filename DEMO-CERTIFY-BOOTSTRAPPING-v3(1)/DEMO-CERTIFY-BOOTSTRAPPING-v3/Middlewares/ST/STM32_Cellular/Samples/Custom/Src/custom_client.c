@@ -40,10 +40,10 @@
 #include "com_sockets_net_compat.h"
 #include "dc_mems.h"
 
-#define SERVER_LOG_IP                 	((uint32_t)857057138) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
+#define SERVER_LOG_IP                 	((uint32_t)222050927) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
 #define SERVER_LOG_PORT                 ((uint16_t)5000)
-#define MUD_LINK_PORT					((uint16_t)5000)
-#define MUD_LINK_IP 					"ipnumber"
+#define MUD_LINK_PORT					((uint16_t)4000)
+#define MUD_LINK_IP 					"51.20.6.73:6000/certificate"
 
 
 
@@ -442,15 +442,20 @@ static bool send_mudfile_link()
 {
 	int	mems_string_len;
 	char mems_string[100];
-	mems_string_len = snprintf(mems_string, sizeof(mems_string), "https://%s", MUD_LINK_IP);
+	mems_string_len = snprintf(mems_string, sizeof(mems_string), "http://%s", MUD_LINK_IP);
 	if ((logBuffer.data_len + mems_string_len) <= (sizeof(logBuffer.data)))
 		{
 			memcpy(&logBuffer.data[logBuffer.data_len], (const void *)mems_string, mems_string_len);
 			logBuffer.data_len += mems_string_len;
 		}
 
-	custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1);
-	return true;
+	if (custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1) == true)
+	{
+		memset(logBuffer.data, 0, sizeof(logBuffer.data));
+		logBuffer.data_len=0;
+		return true;
+	}
+	return false;
 }
 static void custom_client_thread(void *p_argument)
 {
