@@ -185,11 +185,15 @@ def start_tcp_mudlink_server():
                         messages = buffer.decode('utf-8')
                         print("messages 4000: ")
                         print(messages)
-                        get_public_key_mudfile(messages)
+                        port = get_public_key_mudfile(messages)
                         buffer = messages[-1].encode('utf-8')
+
+                        conn.sendall(str(port).encode('utf-8'))
+                        print(f"Sent port {port} back to the sender.")
                     except UnicodeDecodeError:
                         print("Received non-decodable bytes. Skipping.")
                         buffer = b""
+                        port = 0
 
 def process_json_message(message):
     data_points = []
