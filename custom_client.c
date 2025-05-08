@@ -42,8 +42,8 @@
 
 #include "cellular_service_utils.h"
 
-#define SERVER_LOG_IP                 	((uint32_t)222057001) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
-#define SERVER_LOG_PORT                 ((uint16_t)5000)
+#define SERVER_LOG_IP                 	((uint32_t)3232235888) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
+#define SERVER_LOG_PORT                 ((uint16_t)4000)
 #define MUD_LINK_PORT					((uint16_t)4000)
 #define MUD_LINK_IP 					"51.21.197.171:6000/certificate"
 
@@ -56,6 +56,7 @@ typedef struct
 } logBuffer_t;
 
 static logBuffer_t logBuffer;
+static logBuffer_t socketResponse;
 
 
 static bool custom_log_mems()
@@ -161,7 +162,8 @@ static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int
                 	{
 						result = true;
 					}
-
+                	com_recv(id, socketResponse.data, socketResponse.data_len, COM_MSG_WAIT);
+                	PRINT_INFO("############\nanswer: %d\n###############\n", socketResponse.data);
 					// close the socket
 					if (com_closesocket(id) == COM_SOCKETS_ERR_OK)
 					{
