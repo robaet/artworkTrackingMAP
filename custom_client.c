@@ -42,10 +42,11 @@
 
 #include "cellular_service_utils.h"
 
-#define SERVER_LOG_IP                 	((uint32_t)3232235888) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
-#define SERVER_LOG_PORT                 ((uint16_t)4000)
+
+#define SERVER_LOG_IP                 	((uint32_t)222080331) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
+//#define SERVER_LOG_PORT                 ((uint16_t)9999)
 #define MUD_LINK_PORT					((uint16_t)4000)
-#define MUD_LINK_IP 					"51.21.197.171:6000/certificate"
+#define MUD_LINK_IP 					"51.20.37.171:6000/certificate"
 
 
 
@@ -55,9 +56,10 @@ typedef struct
 	int data_len;
 } logBuffer_t;
 
-static logBuffer_t logBuffer;
 static logBuffer_t socketResponse;
 
+static logBuffer_t logBuffer;
+static uint16_t SERVER_LOG_PORT = -1;
 
 static bool custom_log_mems()
 {
@@ -115,6 +117,9 @@ static bool custom_log_mems()
 	}
 	return true;
 }
+uint16_t ntohs(uint16_t netshort) {
+    return (netshort << 8) | (netshort >> 8);
+}
 
 static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int send_mud_link)
 {
@@ -162,8 +167,21 @@ static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int
                 	{
 						result = true;
 					}
-                	com_recv(id, socketResponse.data, socketResponse.data_len, COM_MSG_WAIT);
-                	PRINT_INFO("############\nanswer: %d\n###############\n", socketResponse.data);
+                	PRINT_INFO("before data size%d", socketResponse.data_len);
+
+                	uint8_t buf[2];
+                	int32_t ret2 = com_recv(id, (com_char_t *)buf, 2, COM_MSG_WAIT);
+                	if (ret2 == 2) {
+                	    uint16_t net_port;
+                	    memcpy(&net_port, buf, 2);
+                	    uint16_t port = ntohs(net_port);
+                	    PRINT_INFO("Received port = %u\n", port);  // Should print 5000
+                	    SERVER_LOG_PORT = port;
+                	    PRINT_INFO("server log port: %d", SERVER_LOG_PORT);
+                	} else {
+                		PRINT_INFO("Receive failed, got %d bytes\n", ret2);
+                	}
+                	//SERVER_LOG_PORT = socketResponse;
 					// close the socket
 					if (com_closesocket(id) == COM_SOCKETS_ERR_OK)
 					{
@@ -447,14 +465,20 @@ static bool send_mudfile_link()
 			memcpy(&logBuffer.data[logBuffer.data_len], (const void *)mems_string, mems_string_len);
 			logBuffer.data_len += mems_string_len;
 		}
-
-	if (custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1) == true)
-	{
-		memset(logBuffer.data, 0, sizeof(logBuffer.data));
-		logBuffer.data_len=0;
-		return true;
-	}
-	return false;
+	do {
+		if (custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1))
+		{
+			PRINT_INFO("data port received")
+		}
+		else
+		{
+			 const TickType_t delay = 5000;
+			 vTaskDelay( xDelay );
+		}
+	} while (SERVER_LOG_PORT == -1 || SERVER_LOG_PORT == 65535);
+	memset(logBuffer.data, 0, sizeof(logBuffer.data));
+	logBuffer.data_len=0;
+	return true;
 }
 static void custom_client_thread(void *p_argument)
 {

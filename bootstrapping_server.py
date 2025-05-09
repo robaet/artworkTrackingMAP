@@ -12,6 +12,7 @@ import threading
 import signal
 import subprocess
 import re
+import struct
 
 class Inventory:
     def __init__(self):
@@ -24,6 +25,11 @@ class Inventory:
         return self.devices
 
 inventory = Inventory()
+
+DATA_SERVER_PORT = 5000
+MUD_LINK_SERVER_PORT = 4000
+ERROR_PORT = 65535
+
 
 #Function to tell server to retrieve a MUD file for a device
 #Send a request to the MUD server with a device ID, also verifies the MUD file
@@ -61,8 +67,8 @@ def get_public_key_mudfile(certificate_url):
         inventory.set_devices(device_id)
     except requests.RequestException as e:
         print(f"An error occurred while retrieving the certificate: {e}")
-        return {'error': 'Failed to retrieve certificate'}
-    return {'message': 'MUD file retrieval request sent to MUD server'}
+        return ERROR_PORT
+    return DATA_SERVER_PORT
 
 #Function to parse the MUD file
 def parse_mud(mud):
@@ -119,7 +125,7 @@ def get_current_iptables():
 def start_tcp_data_server():
     print("Starting data handler port...")
     HOST = '0.0.0.0'
-    PORT = 5000
+    PORT = DATA_SERVER_PORT
     delete_all_rules()
     print("#################       iptable rules BEFORE update       ###########\n\n" + get_current_iptables())
     with open("initial_ip_table_config.json", "r") as f:
@@ -160,7 +166,7 @@ def start_tcp_data_server():
 def start_tcp_mudlink_server():
     print("Starting TCP MUD link server...")
     HOST = '0.0.0.0'
-    PORT = 4000
+    PORT = MUD_LINK_SERVER_PORT
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
         server_socket.listen(5) # 5 connections
@@ -188,12 +194,12 @@ def start_tcp_mudlink_server():
                         port = get_public_key_mudfile(messages)
                         buffer = messages[-1].encode('utf-8')
 
-                        conn.sendall(str(port).encode('utf-8'))
+                        conn.sendall(struct.pack('!H', port))
                         print(f"Sent port {port} back to the sender.")
                     except UnicodeDecodeError:
                         print("Received non-decodable bytes. Skipping.")
                         buffer = b""
-                        port = 0
+                        conn.sendall(struct.pack('!H', ERROR_PORT))
 
 def process_json_message(message):
     data_points = []
