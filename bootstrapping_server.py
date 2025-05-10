@@ -200,6 +200,7 @@ def start_tcp_mudlink_server():
                         print("Received non-decodable bytes. Skipping.")
                         buffer = b""
                         conn.sendall(struct.pack('!H', ERROR_PORT))
+                        print(f"Sent port {ERROR_PORT} back to the sender.")
 
 def process_json_message(message):
     data_points = []
