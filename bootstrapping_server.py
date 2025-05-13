@@ -158,6 +158,7 @@ def start_tcp_data_server():
                         messages = re.split(r'(?<=\})', buffer.decode('utf-8'))
                         print("messages: ")
                         print(messages)
+                        process_json_message(messages)
                         buffer = messages[-1].encode('utf-8')
                     except UnicodeDecodeError:
                         print("Received non-decodable bytes. Skipping.")
