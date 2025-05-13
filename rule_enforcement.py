@@ -3,12 +3,14 @@ import subprocess
 
 
 def enforce_ip_table(ip_table):
+    return "enforce_ip_table worked"
     for command in ip_table:
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
     return {'message': 'IP tables rules enforced'}
 
 def translate_to_iptables(policies):
+    return "translate_to_iptables worked"
     iptables_rules = []
     for policy in policies:
         src_ports = policy.get('src-ports', [])
@@ -51,3 +53,20 @@ def translate_to_iptables(policies):
     print("ip table rules: " + str(iptables_rules))
     return iptables_rules
 
+def delete_all_rules():
+    return "delete_all_rules worked"
+    try:
+        subprocess.run(['iptables', '-F'], check=True)
+        print("All iptables rules deleted.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error deleting iptables rules: {e}")
+
+def get_current_iptables():
+    return "get_current_iptables worked"
+    try:
+        result = subprocess.run(['iptables', '-L', '-n', '-v'], capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        return f"Error running iptables: {e.stderr}"
+    except FileNotFoundError:
+        return "iptables command not found. Are you sure it's installed on your system?"

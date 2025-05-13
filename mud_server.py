@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, make_response
-from another_key_generator import generate_key_pair, sign_file
+from key_generator import generate_key_pair, sign_file
 import json
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -87,7 +87,6 @@ def get_mudfile(device_id):
     mud = inventory.get_mud(device_id)
     if mud:
         print(f"MUD file found for device ID {device_id}")
-        #mud_sig = sign_mudfile(mud, key_pair[0])
         mud2 = json.loads(json.dumps(mud, sort_keys=True))
         signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
 
@@ -95,25 +94,9 @@ def get_mudfile(device_id):
     else:
         inventory.store_mud(device_id, device_mud)
         print(f"sample MUD file used for device ID {device_id}")
-        #mud_sig = sign_mudfile(device_mud, key_pair[0])
         mud2 = json.loads(json.dumps(device_mud, sort_keys=True))
         signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
         return {"mud": mud2, "sig": signature.hex()}, 200
-    
-#Endpoint to add a MUD file to the inventory from outside the server   
-@app.route('/mud/<device_id>', methods=['POST'])
-def post_mud(device_id):
-    new_mud = request.get_json()
-
-    inventory.store_mud(device_id, new_mud)
-
-    response = {
-        'status': 'success',
-        'message': 'Mud file added to inventory',
-        'data': new_mud
-    }
-
-    return jsonify(response), 200
 
 #Endpoint to retrieve the public key of the server
 @app.route('/certificate', methods=['GET'])
@@ -132,33 +115,6 @@ def retrieve_certificate():
     else:
         print(f"no certificate found")
         return jsonify({'error': 'certificate not found'}), 404
-
-#Function to sign the MUD file
-#TODO test this function
-@DeprecationWarning
-def sign_mudfile(mud, pk):
-    # Load private key
-    private_key = load_pem_private_key(pk, password=None, backend=default_backend())
-
-    # Serialize JSON dictionary to bytes
-    json_data = json.dumps(mud, separators=(',', ':')).encode('utf-8')
-
-    # Calculate the digest of the data
-    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-    digest.update(json_data)
-    hashed_data = digest.finalize()
-
-    # Sign the hashed data
-    signature = private_key.sign(
-        hashed_data,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH
-        ),
-        utils.Prehashed(hashes.SHA256())
-    )
-
-    return signature
 
 def serverShutdown(sig, frame):
     print("Manual shutdown...")

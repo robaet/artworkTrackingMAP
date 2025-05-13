@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-from rule_enforcement import translate_to_iptables, enforce_ip_table
+from rule_enforcement import translate_to_iptables, enforce_ip_table, delete_all_rules, get_current_iptables
 import requests
 import json
-from another_key_generator import verify_signature
+from key_generator import verify_signature
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 import atexit
@@ -13,13 +13,14 @@ import signal
 import subprocess
 import re
 import struct
+from Device import Device
 
 class Inventory:
     def __init__(self):
         self.devices = set()
 
-    def set_devices(self, device_id):
-        self.devices.add(device_id)
+    def set_devices(self, device):
+        self.devices.add(device)
 
     def get_devices(self):
         return self.devices
@@ -35,7 +36,12 @@ ERROR_PORT = 65535
 #Send a request to the MUD server with a device ID, also verifies the MUD file
 def get_mudfile(mudfile_url, device_id, certificate_path):
     try:
-        response = requests.get(mudfile_url)
+        headers = {
+            "Accept": "application/mud+json",
+            "Accept-Language": "en",
+            "User-Agent": "Bootstrapping_Server/1.0"
+        }
+        response = requests.get(mudfile_url, headers=headers)
         if response.status_code == 200:
             data = json.loads(response.content.decode('utf-8'))
             mud = data["mud"]
@@ -52,8 +58,13 @@ def get_mudfile(mudfile_url, device_id, certificate_path):
 def get_public_key_mudfile(certificate_url):
     print("certificate url: " + certificate_url)
     try:
-        response = requests.get(certificate_url)
-            
+        headers = {
+            "Accept": "application/mud+json",
+            "Accept-Language": "en",
+            "User-Agent": "Bootstrapping_Server/1.0"
+        }
+        response = requests.get(certificate_url, headers=headers)
+
         mudfile_url = response.headers.get('mudfile_url')
         mudfile_url = certificate_url.strip("/certificate")+mudfile_url
         print("mudfileurl: "+mudfile_url)
@@ -64,7 +75,7 @@ def get_public_key_mudfile(certificate_url):
             f.write(response.content)
             print(f"Certificate saved to {certificate_path}")
         get_mudfile(mudfile_url, device_id, certificate_path)
-        inventory.set_devices(device_id)
+        inventory.set_devices(Device(device_id, certificate_path, mudfile_url))
     except requests.RequestException as e:
         print(f"An error occurred while retrieving the certificate: {e}")
         return ERROR_PORT
@@ -94,33 +105,13 @@ def parse_mud(mud):
             policies.append(policy)
     return policies
 
-
-def delete_all_rules():
-    try:
-        subprocess.run(['iptables', '-F'], check=True)
-        print("All iptables rules deleted.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error deleting iptables rules: {e}")
-
-# TODO
-'''
-def update_policies():    
-    for device_id in inventory.get_devices():
-        url = f"http://{localhost}:{6000}/mud/{device_id}" #todo actual bootstrapping server IP
-        response = requests.get(url)
-        if response.status_code == 200:
-            print(f"Successfully updated policies for device ID {device_id}")
-        else:
-            print(f"Failed to update policies for device ID {device_id}. HTTP status code: {response.status_code}")'''
-
-def get_current_iptables():
-    try:
-        result = subprocess.run(['iptables', '-L', '-n', '-v'], capture_output=True, text=True, check=True)
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        return f"Error running iptables: {e.stderr}"
-    except FileNotFoundError:
-        return "iptables command not found. Are you sure it's installed on your system?"
+def update_policies():
+    for device in inventory.get_devices():
+        try:
+            get_mudfile(device.getMudUrl(), device.getId(), device.getCertificate())
+            print(f"Policies updated for device ID {device.getId()}")
+        except requests.RequestException as e:
+            print(f"An error occurred while updating the MUD file: {e}")
 
 def start_tcp_data_server():
     print("Starting data handler port...")
@@ -233,10 +224,10 @@ def serverShutdown(sig, frame):
 
 if __name__ == '__main__':
     print("Starting bootstrapping server...")
-    #scheduler = BackgroundScheduler()
-    #job = scheduler.add_job(update_policies, 'interval', seconds=10)
-    #scheduler.start()
-    #atexit.register(lambda: scheduler.shutdown())
+    scheduler = BackgroundScheduler()
+    job = scheduler.add_job(update_policies, 'interval', seconds=10)
+    scheduler.start()
+    atexit.register(lambda: scheduler.shutdown())
 
     signal.signal(signal.SIGINT, serverShutdown)
     tcp_data_thread = threading.Thread(target=start_tcp_data_server)
