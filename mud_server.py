@@ -72,7 +72,7 @@ device_mud = {
             }
     }
 }
-inventory.store_mud(1, device_mud)
+#inventory.store_mud(1, device_mud)
 
 
 #Function to check if the IP address is in the allowed set
@@ -99,8 +99,8 @@ def get_mudfile(device_id):
         return {"mud": mud2, "sig": signature.hex()}, 200
 
 #Endpoint to retrieve the public key of the server
-@app.route('/certificate', methods=['GET'])
-def retrieve_certificate():
+@app.route('/certificate/<int:device_id>', methods=['GET'])
+def retrieve_certificate(device_id):
     pk = certificate
     print(f"certificate: {pk}")
     if pk:
@@ -108,7 +108,6 @@ def retrieve_certificate():
         cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
         response = make_response(cert_pem)
         response.headers['Content-Type'] = '"application/pkcs7-signature"'
-        device_id = "123"  # TODO: make this dynamic
         response.headers['mudfile_url'] = f'/mud/{device_id}'
         response.headers['device_id'] = device_id
         return response, 200
@@ -121,11 +120,14 @@ def serverShutdown(sig, frame):
     exit(0)
 
 #Endpoint to add a MUD file to the inventory from outside the server   
-@app.route('/mud/<device_id>', methods=['POST'])
+@app.route('/mud/upload/<device_id>', methods=['POST'])
 def post_mud(device_id):
     new_mud = request.get_json()
-
-    inventory.store_mud(device_id, new_mud)
+    print(new_mud)
+    file_name = f"mud_{device_id}.json"
+    with open(file_name, "w") as file:
+        json.dump(new_mud, file, indent=2)
+    inventory.store_mud(device_id, file_name)
 
     response = {
         'status': 'success',

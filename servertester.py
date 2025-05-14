@@ -18,15 +18,28 @@ import socket
 import time
 import threading
 import signal
+import json
+from flask import request, jsonify, Flask
+import requests
 
 # Server details
 HOST = '192.168.1.112'  # Localhost
-PORT = 4000        # Make sure this matches your server's port
+PORT = 6000        # Make sure this matches your server's port
 
 # Message to send
-data = '{"yves":"funf", "time": "1000001","temperature": "20C","humidity": "17%","acceleration": "[2, 3, 4]"}' \
-'{"yves":"funf", "time": "1000001","temperature": "20C","humidity": "17%","acceleration": "[2, 3, 4]"}'
-data = "http://192.168.1.112:6000/certificate"
+data = {
+"name": "Sample MUD Profile", "manufacturer": "Example", "model": "ABC123", "cache-validity": 48, "mud_url": "http://example.com/mud-files/ABC123", "last_update": "2019-04-17T09:47:00+00:00", 
+ "policy": 
+    {
+        "acl": 
+            {
+                "input": [
+                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT"},
+                ]
+            }
+    }
+}
+#data = "http://192.168.1.112:6000/mud/234"
 
 def ping_server():
 
@@ -46,11 +59,22 @@ def ping_server():
     except ConnectionRefusedError:
         print(f"Could not connect to the server at {HOST}:{PORT}")
 
+def upload_mud_file(device_id):
+    try:
+        print("hallooooooo")
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(f'http://192.168.1.112:6000/mud/upload/{device_id}', data=json.dumps(data), headers=headers)
+        response.raise_for_status()  # Raise an error for bad responses (4xx and 5xx)
+        return response
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred: {e}")
+        return None
 
 def serverShutdown(sig, frame):
     print("Manual shutdown...")
     exit(0)
 
 if __name__ == '__main__':
-    ping_server()
+    upload_mud_file(1)
+    #ping_server()
     signal.signal(signal.SIGINT, serverShutdown)

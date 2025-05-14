@@ -14,6 +14,7 @@ import subprocess
 import re
 import struct
 from Device import Device
+from urllib.parse import urlparse
 
 class Inventory:
     def __init__(self):
@@ -66,7 +67,8 @@ def get_public_key_mudfile(certificate_url):
         response = requests.get(certificate_url, headers=headers)
 
         mudfile_url = response.headers.get('mudfile_url')
-        mudfile_url = certificate_url.strip("/certificate")+mudfile_url
+        parsed = urlparse(certificate_url)
+        mudfile_url = f"{parsed.scheme}://{parsed.hostname}"+mudfile_url
         print("mudfileurl: "+mudfile_url)
 
         device_id = response.headers.get('device_id')
