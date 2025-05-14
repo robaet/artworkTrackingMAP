@@ -139,6 +139,9 @@ def start_tcp_data_server():
                 continue 
             with conn:
                 print('Connected by', addr)
+                with open("connection_log.txt", "a") as log_file:
+                    log_entry = f"{datetime.now().isoformat()} - Connected by {addr[0]}\n"
+                    log_file.write(log_entry)
                 buffer = b"" 
                 while True:
                     data = conn.recv(1024)
