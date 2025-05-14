@@ -122,18 +122,24 @@ def serverShutdown(sig, frame):
 #Endpoint to add a MUD file to the inventory from outside the server   
 @app.route('/mud/upload/<device_id>', methods=['POST'])
 def post_mud(device_id):
-    new_mud = request.get_json()
-    print(new_mud)
-    file_name = f"mud_{device_id}.json"
-    with open(file_name, "w") as file:
-        json.dump(new_mud, file, indent=2)
-    inventory.store_mud(device_id, file_name)
+    try:
 
-    response = {
-        'status': 'success',
-        'message': 'Mud file added to inventory',
-        'data': new_mud
-    }
+        new_mud = request.get_json()
+        print(new_mud)
+        file_name = f"mud_{device_id}.json"
+        with open(file_name, "w") as file:
+            json.dump(new_mud, file, indent=2)
+        inventory.store_mud(device_id, file_name)
+
+        response = {
+            'status': 'success',
+            'message': 'Mud file added to inventory',
+            'data': new_mud
+        }
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return jsonify({'error': 'Failed to add MUD file'}), 500
+
 
     return jsonify(response), 200
     
