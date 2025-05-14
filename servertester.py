@@ -23,7 +23,7 @@ from flask import request, jsonify, Flask
 import requests
 
 # Server details
-HOST = '192.168.1.112'  # Localhost
+HOST = '13.48.42.247'  # Localhost
 PORT = 6000        # Make sure this matches your server's port
 
 # Message to send
@@ -39,7 +39,7 @@ data = {
             }
     }
 }
-#data = "http://192.168.1.112:6000/mud/234"
+#data = "http://13.48.42.247:6000/mud/234"
 
 def ping_server():
 
@@ -63,7 +63,7 @@ def upload_mud_file(device_id):
     try:
         print("hallooooooo")
         headers = {'Content-Type': 'application/json'}
-        response = requests.post(f'http://192.168.1.112:6000/mud/upload/{device_id}', data=json.dumps(data), headers=headers)
+        response = requests.post(f'http://13.48.42.247:6000/mud/upload/{device_id}', data=json.dumps(data), headers=headers)
         response.raise_for_status()  # Raise an error for bad responses (4xx and 5xx)
         return response
     except requests.exceptions.RequestException as e:
