@@ -31,7 +31,7 @@ inventory = Inventory()
 private_key, certificate = generate_key_pair()
 
 #Sample device MUD file in JSON format. This MUD file (if enforced correctly) would allow the IoT device to accept inbound HTTP and HTTPS
-device_mud = {
+'''device_mud = {
         'name': 'Sample MUD Profile',
         'manufacturer': 'Example',
         'model': 'ABC123',
@@ -72,7 +72,7 @@ device_mud = {
             }
     }
 }
-#inventory.store_mud(1, device_mud)
+#inventory.store_mud(1, device_mud)'''
 
 
 #Function to check if the IP address is in the allowed set
