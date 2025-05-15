@@ -5,9 +5,13 @@ import subprocess
 def enforce_ip_table(ip_table):
     #return "enforce_ip_table worked"
     for command in ip_table:
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
-    return {'message': 'IP tables rules enforced'}
+        try:
+            result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(result.stdout.decode('utf-8'), result.stderr.decode('utf-8'))
+        except subprocess.CalledProcessError as e:
+            print(f"Error enforcing iptables rule: {e}")
+    print("IP tables rules enforced.")
+    return True
 
 def translate_to_iptables(policies):
     #return "translate_to_iptables worked"

@@ -1,7 +1,23 @@
-from urllib.parse import urlparse
+def duo():
+    try:
+        print("duo")
+        raise NameError("Error in duo")
+    except ValueError as e:
+        print("errorrrrrorror")
+        raise
 
-url = "https://123.123.12.23/something/else"
-parsed = urlparse(url)
+def uno():
+    n = 0
+    for i in range(5):
+        try:
+            n+=1
+            print(n)
+            if n == 3:
+                raise ValueError("Error in uno")
+        except ValueError as e:
+            print(f"Error in uno: {e}")
+            
+        finally:
+            print("finally in uno")
 
-base_url = f"{parsed.scheme}://{parsed.hostname}"
-print(base_url)  # Output: http://123.123.12.23
+duo()

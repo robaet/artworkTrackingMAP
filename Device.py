@@ -1,8 +1,9 @@
 class Device:
-    def __init__(self, id, certificate, mud_url):
+    def __init__(self, id, certificate, mud_url, ip_address):
         self.id = id
         self.certificate = certificate
         self.mud_url = mud_url
+        self.ip_address = ip_address
 
     def getId(self):
         return self.id

@@ -34,7 +34,8 @@ data = {
         "acl": 
             {
                 "input": [
-                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT"},
+                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT", },
+                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT", "src-ip":"195.65.5.220"},
                 ]
             }
     }

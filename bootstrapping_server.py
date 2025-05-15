@@ -35,7 +35,7 @@ ERROR_PORT = 65535
 
 #Function to tell server to retrieve a MUD file for a device
 #Send a request to the MUD server with a device ID, also verifies the MUD file
-def get_mudfile(mudfile_url, device_id, certificate_path):
+def get_mudfile(mudfile_url, device_id, certificate_path, fromupdate):
     try:
         headers = {
             "Accept": "application/mud+json",
@@ -49,14 +49,18 @@ def get_mudfile(mudfile_url, device_id, certificate_path):
             sig = bytes.fromhex(data["sig"])
             if not verify_signature(json.dumps(mud).encode('utf-8'), sig, certificate_path):
                 print(f"MUD file retrieved for device ID {device_id} is invalid.")
+                return False
             else:
                 enforce_ip_table(translate_to_iptables(parse_mud(mud)))
+                return True
         else:
             print(f"Failed to request MUD file retrieval for device ID {device_id}. HTTP status code: {response.status_code}")
+            return False
     except requests.RequestException as e:
-        print(f"An error occurred in bootstrapping server trying to get MUD File for device ID {device_id}: {e}")
+        print(f"An error occurred in bootstrapping server trying to get MUD File for device ID {device_id} {fromupdate}: {e}")
+        return False
 
-def get_public_key_mudfile(certificate_url):
+def get_public_key_mudfile(certificate_url, addr):
     print("certificate url: " + certificate_url)
     try:
         headers = {
@@ -68,17 +72,22 @@ def get_public_key_mudfile(certificate_url):
 
         mudfile_url = response.headers.get('mudfile_url')
         parsed = urlparse(certificate_url)
-        mudfile_url = f"{parsed.scheme}://{parsed.hostname}"+mudfile_url
+        mudfile_url = f"{parsed.scheme}://{parsed.netloc}"+mudfile_url
         print("mudfileurl: "+mudfile_url)
 
         device_id = response.headers.get('device_id')
-        certificate_path = f'{device_id}_certificate.pem'
+        certificate_path = f'{parsed.hostname}_{device_id}_certificate.pem'
         with open(certificate_path, 'wb') as f:
             f.write(response.content)
             print(f"Certificate saved to {certificate_path}")
-        get_mudfile(mudfile_url, device_id, certificate_path)
-        inventory.set_devices(Device(device_id, certificate_path, mudfile_url))
-    except requests.RequestException as e:
+        if not get_mudfile(mudfile_url, device_id, certificate_path, False):
+            print(f"Failed to retrieve MUD file for device ID {device_id}.")
+            return ERROR_PORT
+        inventory.set_devices(Device(device_id, certificate_path, mudfile_url, addr))
+        print(addr)
+        for d in inventory.get_devices():
+            print(f"Device ID: {d.getId()}")
+    except Exception as e:
         print(f"An error occurred while retrieving the certificate: {e}")
         return ERROR_PORT
     return DATA_SERVER_PORT
@@ -109,11 +118,12 @@ def parse_mud(mud):
 
 def update_policies():
     for device in inventory.get_devices():
-        try:
-            get_mudfile(device.getMudUrl(), device.getId(), device.getCertificate())
+        print(f"update_policies: {device.getMudUrl()}, {device.getId()}, {device.getCertificate()}")
+        
+        if not get_mudfile(device.getMudUrl(), device.getId(), device.getCertificate(), True):
+            print(f"Failed to retrieve MUD file for device ID {device.getId()}.")
+        else:
             print(f"Policies updated for device ID {device.getId()}")
-        except requests.RequestException as e:
-            print(f"An error occurred while updating the MUD file: {e}")
 
 def start_tcp_data_server():
     print("Starting data handler port...")
@@ -188,7 +198,7 @@ def start_tcp_mudlink_server():
                         messages = buffer.decode('utf-8')
                         print("messages 4000: ")
                         print(messages)
-                        port = get_public_key_mudfile(messages)
+                        port = get_public_key_mudfile(messages, addr)
                         buffer = messages[-1].encode('utf-8')
 
                         conn.sendall(struct.pack('!H', port))

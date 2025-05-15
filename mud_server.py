@@ -8,6 +8,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from OpenSSL import crypto
 import signal
+import re
+import os
 
 app = Flask(__name__)
 
@@ -81,22 +83,25 @@ def is_valid_ip(ip_address):
     return ip_address in ALLOWED_IPS
 
 #Endpoint to retrieve MUD file for a specific device
-#If the MUD file is not found in the inventory, the server just use the sample device MUD file for now
 @app.route('/mud/<device_id>', methods=['GET'])
 def get_mudfile(device_id):
     mud = inventory.get_mud(device_id)
+    print(device_id)
     if mud:
+        with open(f"mud_{device_id}.json", "r") as file:
+            mud_file = json.load(file)
         print(f"MUD file found for device ID {device_id}")
-        mud2 = json.loads(json.dumps(mud, sort_keys=True))
-        signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
+        normed_mud = json.loads(json.dumps(mud_file, sort_keys=True))
+        signature = sign_file(json.dumps(normed_mud).encode('utf-8'), private_key)
 
-        return {"mud": mud2, "sig": signature.hex()}, 200
-    else:
+        return {"mud": normed_mud, "sig": signature.hex()}, 200
+    return jsonify({'error': 'MUD file not found for device {device_id}'}), 404
+    '''else:
         inventory.store_mud(device_id, device_mud)
         print(f"sample MUD file used for device ID {device_id}")
         mud2 = json.loads(json.dumps(device_mud, sort_keys=True))
         signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
-        return {"mud": mud2, "sig": signature.hex()}, 200
+        return {"mud": mud2, "sig": signature.hex()}, 200'''
 
 #Endpoint to retrieve the public key of the server
 @app.route('/certificate/<int:device_id>', methods=['GET'])
@@ -143,9 +148,24 @@ def post_mud(device_id):
 
     return jsonify(response), 200
     
+def find_mud_files():
+    pattern = re.compile(r'^mud_(\d+)\.json$')
+    result = []
+    for f in os.listdir('.'):
+        if os.path.isfile(f):
+            match = pattern.match(f)
+            if match:
+                file_id = match.group(1)
+                inventory.store_mud(file_id, f"mud_{file_id}.json")
+                result.append(file_id)
+    
+    print("Found MUD files for devices: " + str(result))
+
 if __name__ == '__main__':
     print(private_key)
     print(certificate)
+    find_mud_files()
+
     app.run(host='0.0.0.0', port=6000)
 
     signal.signal(signal.SIGINT, serverShutdown)
