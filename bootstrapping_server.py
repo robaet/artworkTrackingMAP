@@ -213,6 +213,8 @@ def process_json_message(message):
     data_points = []
     for msg in message:
         try:
+            if msg == "":
+                continue
             data_points.append(json.loads(msg))
         except json.JSONDecodeError:
             print("JSON decode error. Skipping message:", msg)
