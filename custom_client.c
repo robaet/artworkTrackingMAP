@@ -43,10 +43,10 @@
 #include "cellular_service_utils.h"
 
 
-#define SERVER_LOG_IP                 	((uint32_t)954473428) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
+#define SERVER_LOG_IP                 	((uint32_t)222055689) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
 //#define SERVER_LOG_PORT                 ((uint16_t)9999)
 #define MUD_LINK_PORT					((uint16_t)4000)
-#define MUD_LINK_IP 					"13.60.184.26:6000/certificate"
+#define MUD_LINK_IP 					"13.60.104.114:6000/certificate"
 #define MUD_DEVICE_ID					((int)1)
 
 
@@ -200,6 +200,10 @@ static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int
                 else
                 {
                 	PRINT_INFO("socket connect NOK\n\r")
+					if (com_closesocket(id) == COM_SOCKETS_ERR_OK)
+						{
+							PRINT_INFO("socket close OK\n\r")
+						}
                 }
 	          }
 	          else
@@ -328,7 +332,6 @@ static cmd_status_t custom_client_cmd_help(uint8_t *cmd_p,
   */
 static cmd_status_t custom_client_cmd(uint8_t *cmd_line_p)
 {
-  PRINT_INFO("JUHU: %p", cmd_line_p)
   uint32_t argc;
   uint8_t  *argv_p[10];
   uint8_t  *cmd_p;
@@ -375,6 +378,8 @@ static cmd_status_t custom_client_cmd(uint8_t *cmd_line_p)
 			memset(logBuffer.data, 0, sizeof(logBuffer.data));
 			logBuffer.data_len=0;
 		}
+		memset(logBuffer.data, 0, sizeof(logBuffer.data));
+		logBuffer.data_len=0;
     }
     //send mud link
     else if (memcmp((CRC_CHAR_t *)argv_p[0],
