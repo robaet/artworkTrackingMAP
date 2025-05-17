@@ -35,7 +35,7 @@ data = {
             {
                 "input": [
                     {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT", },
-                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT", "src-ip":"195.65.5.77"},
+                    {"name": "allow_tcp_data", "protocol": "tcp", "dst-port": [5000], "action": "ACCEPT", "src-ip":"195.65.5.203"},
                 ]
             }
     }
@@ -64,7 +64,7 @@ def upload_mud_file(device_id):
     try:
         print("hallooooooo")
         headers = {'Content-Type': 'application/json'}
-        response = requests.post(f'http://13.60.104.114:6000/mud/upload/{device_id}', data=json.dumps(data), headers=headers)
+        response = requests.post(f'http://13.60.51.180:6000/mud/upload/{device_id}', data=json.dumps(data), headers=headers)
         response.raise_for_status()  # Raise an error for bad responses (4xx and 5xx)
         return response
     except requests.exceptions.RequestException as e:

@@ -21,10 +21,10 @@ class Inventory:
         self.devices = {}
         self.device_policies = {}
 
-    def store_mud(self, device_id, mud):
-        self.devices[device_id] = mud
+    def store_mud(self, device_id, mud_file_path):
+        self.devices[device_id] = mud_file_path
 
-    def get_mud(self, device_id):
+    def get_mud_file_path(self, device_id):
         return self.devices.get(device_id)
 
 inventory = Inventory()
@@ -85,17 +85,22 @@ def is_valid_ip(ip_address):
 #Endpoint to retrieve MUD file for a specific device
 @app.route('/mud/<device_id>', methods=['GET'])
 def get_mudfile(device_id):
-    mud = inventory.get_mud(device_id)
+    mud_file_path = inventory.get_mud_file_path(device_id)
     print(device_id)
-    if mud:
-        with open(f"mud_{device_id}.json", "r") as file:
-            mud_file = json.load(file)
-        print(f"MUD file found for device ID {device_id}")
-        normed_mud = json.loads(json.dumps(mud_file, sort_keys=True))
-        signature = sign_file(json.dumps(normed_mud).encode('utf-8'), private_key)
+    if mud_file_path:
+        try:
+            with open(mud_file_path, "r") as file:
+                mud_file = json.load(file)
+            print(f"MUD file found for device ID {device_id}")
+            normed_mud = json.loads(json.dumps(mud_file, sort_keys=True))
+            signature = sign_file(json.dumps(normed_mud).encode('utf-8'), private_key)
 
-        return {"mud": normed_mud, "sig": signature.hex()}, 200
+            return {"mud": normed_mud, "sig": signature.hex()}, 200
+        except Exception as e:
+            print(f"Error retrieving MUD file: {e}")
+            return jsonify({'error': 'MUD file not found for device {device_id}'}), 404
     return jsonify({'error': 'MUD file not found for device {device_id}'}), 404
+    
     '''else:
         inventory.store_mud(device_id, device_mud)
         print(f"sample MUD file used for device ID {device_id}")
@@ -109,13 +114,17 @@ def retrieve_certificate(device_id):
     pk = certificate
     print(f"certificate: {pk}")
     if pk:
-        print(f"found certificate {pk}")
-        cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
-        response = make_response(cert_pem)
-        response.headers['Content-Type'] = '"application/pkcs7-signature"'
-        response.headers['mudfile_url'] = f'/mud/{device_id}'
-        response.headers['device_id'] = device_id
-        return response, 200
+        try:
+            print(f"found certificate {pk}")
+            cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
+            response = make_response(cert_pem)
+            response.headers['Content-Type'] = '"application/pkcs7-signature"'
+            response.headers['mudfile_url'] = f'/mud/{device_id}'
+            response.headers['device_id'] = device_id
+            return response, 200
+        except Exception as e:
+            print(f"Error retrieving MUD URL: {e}")
+            return jsonify({'error': 'Failed to retrieve MUD URL'}), 500
     else:
         print(f"no certificate found")
         return jsonify({'error': 'certificate not found'}), 404

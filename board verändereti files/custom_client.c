@@ -43,10 +43,10 @@
 #include "cellular_service_utils.h"
 
 
-#define SERVER_LOG_IP                 	((uint32_t)222055689) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
+#define SERVER_LOG_IP                 	((uint32_t)222128477) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
 //#define SERVER_LOG_PORT                 ((uint16_t)9999)
 #define MUD_LINK_PORT					((uint16_t)4000)
-#define MUD_LINK_IP 					"13.60.104.114:6000/certificate"
+#define MUD_CERTIFICATE_URL 			"13.60.51.180:6000/certificate"
 #define MUD_DEVICE_ID					((int)1)
 
 
@@ -186,7 +186,6 @@ static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int
 							result = false;
 						}
                 	}
-                	//SERVER_LOG_PORT = socketResponse;
 					// close the socket
 					if (com_closesocket(id) == COM_SOCKETS_ERR_OK)
 					{
@@ -469,7 +468,7 @@ static bool send_mudfile_link()
 {
 	int	mems_string_len;
 	char mems_string[100];
-	mems_string_len = snprintf(mems_string, sizeof(mems_string), "http://%s/%d", MUD_LINK_IP, MUD_DEVICE_ID);
+	mems_string_len = snprintf(mems_string, sizeof(mems_string), "http://%s/%d", MUD_CERTIFICATE_URL, MUD_DEVICE_ID);
 	if ((logBuffer.data_len + mems_string_len) <= (sizeof(logBuffer.data)))
 		{
 			memcpy(&logBuffer.data[logBuffer.data_len], (const void *)mems_string, mems_string_len);

@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from rule_enforcement import translate_to_iptables, enforce_ip_table, delete_all_rules, get_current_iptables
+from rule_enforcement import translate_to_iptables, enforce_ip_table, delete_all_rules, get_current_iptables, remove_rules_with_certain_ip
 import requests
 import json
 from key_generator import verify_signature
@@ -20,11 +20,14 @@ class Inventory:
     def __init__(self):
         self.devices = set()
 
-    def set_devices(self, device):
+    def set_devices(self, device: Device):
         self.devices.add(device)
 
     def get_devices(self):
         return self.devices
+    def remove_device(self, device: Device):
+        print(f"Device with ID {device.getId()} removed from inventory.")
+        self.devices.remove(device)
 
 inventory = Inventory()
 
@@ -84,9 +87,6 @@ def get_public_key_mudfile(certificate_url, addr):
             print(f"Failed to retrieve MUD file for device ID {device_id}.")
             return ERROR_PORT
         inventory.set_devices(Device(device_id, certificate_path, mudfile_url, addr))
-        print(addr)
-        for d in inventory.get_devices():
-            print(f"Device ID: {d.getId()}")
     except Exception as e:
         print(f"An error occurred while retrieving the certificate: {e}")
         return ERROR_PORT
@@ -117,14 +117,21 @@ def parse_mud(mud):
     return policies
 
 def update_policies():
+    devices_to_remove = []
     for device in inventory.get_devices():
         print(f"update_policies: {device.getMudUrl()}, {device.getId()}, {device.getCertificate()}")
         
         if not get_mudfile(device.getMudUrl(), device.getId(), device.getCertificate(), True):
             print(f"Failed to retrieve MUD file for device ID {device.getId()}.")
+            remove_rules_with_certain_ip(device.getIpAddress())
+            devices_to_remove.append(device)
         else:
             print(f"Policies updated for device ID {device.getId()}")
 
+    for deleted_device in devices_to_remove:
+        inventory.remove_device(deleted_device)
+    print("current policies: ")
+    print(get_current_iptables())
 def start_tcp_data_server():
     print("Starting data handler port...")
     HOST = '0.0.0.0'
@@ -198,7 +205,7 @@ def start_tcp_mudlink_server():
                         messages = buffer.decode('utf-8')
                         print("messages 4000: ")
                         print(messages)
-                        port = get_public_key_mudfile(messages, addr)
+                        port = get_public_key_mudfile(messages, addr[0])
                         buffer = messages[-1].encode('utf-8')
 
                         conn.sendall(struct.pack('!H', port))

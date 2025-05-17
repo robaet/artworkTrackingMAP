@@ -13,6 +13,9 @@ class Device:
     
     def getMudUrl(self):
         return self.mud_url
+    
+    def getIpAddress(self):
+        return self.ip_address
 
     def __str__(self):
         return f"Device(name={self.id}, type={self.certificate}, status={self.mud_url})"

@@ -74,3 +74,30 @@ def get_current_iptables():
         return f"Error running iptables: {e.stderr}"
     except FileNotFoundError:
         return "iptables command not found. Are you sure it's installed on your system?"
+    
+def remove_rules_with_certain_ip(ip_address):
+    try:
+        result = subprocess.run(
+            ["iptables", "-S"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        
+        rules = result.stdout.strip().split('\n')
+        
+        for rule in rules:
+            if ip_address in rule:
+                delete_rule = rule.replace("-A", "-D", 1)  # Change to delete
+                print(f"Removing rule: {delete_rule}")
+                subprocess.run(
+                    ["iptables"] + delete_rule.split(),
+                    check=True
+                )
+                print(f"Removed rule: {delete_rule}")
+
+        get_current_iptables()
+                
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e.stderr}")
