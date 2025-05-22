@@ -1,8 +1,44 @@
 # artworkTrackingMAP
-#test
 
-yves abelade: pip install apscheduler
+# Introduction
+This README explains how to run the code in this repository in order to imitate the results of our thesis.
+The code to get the servers working lies within the "artworkTrackingMAP" folder. The .bin file for the ST-board can be found in "artworkTrackingMAP\DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\Debug\Prj_Murata_L462.bin".
 
-##Prerequisites
-pip install apscheduler
-todo: die andere pip installs inetue
+# Servers
+## What Type
+We used AWS EC2 ubuntu servers for the server structure. You can also run it locally. Make sure its a linux system though, as it will need to manipulate iptables to enforce MUD rules. If you run AWS EC2 instances make sure you whitelist the servers respectively. Also you must whitelist port 4000 for all communication on the server running the bootstrapping_server.py code. 
+
+## Getting Servers Ready
+
+Connecting to an AWS EC2 instance via CMD:
+*ssh -i path/to/key ubuntu@ip.address*
+
+Uploading a file to AWS EC2 instance via CMD:
+*scp -i path/to/key path/to/file ubuntu@ip.address:path/on/server*
+
+Installing a Library on AWS Server:
+*sudo apt install python3-nameOfLibrary*
+
+You need two servers. On the first "Bootstrapping Server", you will need to have:
+* bootstrapping_server.py
+* Device.py
+* key_generator.py
+* rule_enforcement.py
+* initial_ip_table_config.json
+
+On the second "MUD Server", you will need to have:
+* mud_server.py
+* key_generator.py
+
+Once the files are loaded (no folders needed, put every file at the same place), the dependencies must be added to the servers. Make sure you upload all libraries to the servers you dont already have.
+
+## Running Servers
+To run the servers simply run the command "sudo python3 bootstrapping_server.py" on the Bootstrapping Server and "sudo python3 mud_server.py" on the MUD Server. The servers should now be functional and listen on various Ports. Once the servers are functional you can continue with the board.
+
+
+# Board
+As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicroelectronics, with additional SIM slot and antenna. To run the board code you connect the board to your computer and open TeraTerm. In TeraTerm click on "Serial" then "ok". Then in TeraTerm click "setup", "Serial port" and set Speed to 115200 and press "new setting". Then send the binary file "Prj_Murata_L462.bin" to the board and enter "mems period 1000" into the command line.
+
+# Data
+If everything runs, the system will automatically log data on the Bootstrapping Server in the sensor_data.txt file. The connection_log.txt file logs from what IP connections have been established, if that is of interest.
+In the /data folder you can find the data of the two test runs that was used in the Thesis.
