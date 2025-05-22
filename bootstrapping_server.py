@@ -56,7 +56,7 @@ def get_mudfile(mudfile_url, addr, fromupdate):
             certificate_url = f"{parsed.scheme}://{parsed.netloc}" + certificate_url
             print(f"Received MUD file for device ID {device_id} from {mudfile_url}")
             print("certificate_url: " + certificate_url)
-            return get_certificate(certificate_url, addr, mud, sig, device_id, parsed.hostname, mudfile_url)
+            return get_certificate(certificate_url, addr, mud, sig, device_id, parsed.hostname, mudfile_url, fromupdate)
         else:
             print(f"Failed to request MUD file retrieval for device ID {device_id}. HTTP status code: {response.status_code}")
             return ERROR_PORT
