@@ -42,3 +42,7 @@ As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicr
 # Data
 If everything runs, the system will automatically log data on the Bootstrapping Server in the sensor_data.txt file. The connection_log.txt file logs from what IP connections have been established, if that is of interest.
 In the /data folder you can find the data of the two test runs that was used in the Thesis.
+
+## GPS
+The GPS data was collected via Android App. All Android Studio Project files are within the LocationLogger folder. 
+artworkTrackingMAP\LocationLogger\app\src\main\java\com\example\locationlogger\MainActivity.kt is the main file.
