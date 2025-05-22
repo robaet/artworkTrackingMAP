@@ -94,8 +94,8 @@ def get_mudfile(device_id):
             print(f"MUD file found for device ID {device_id}")
             normed_mud = json.loads(json.dumps(mud_file, sort_keys=True))
             signature = sign_file(json.dumps(normed_mud).encode('utf-8'), private_key)
-
-            return {"mud": normed_mud, "sig": signature.hex()}, 200
+            certificate_url = f'/certificate'
+            return {"mud": normed_mud, "sig": signature.hex(), "device_id": device_id, "certificate_url": certificate_url}, 200
         except Exception as e:
             print(f"Error retrieving MUD file: {e}")
             return jsonify({'error': 'MUD file not found for device {device_id}'}), 404
@@ -109,8 +109,8 @@ def get_mudfile(device_id):
         return {"mud": mud2, "sig": signature.hex()}, 200'''
 
 #Endpoint to retrieve the public key of the server
-@app.route('/certificate/<int:device_id>', methods=['GET'])
-def retrieve_certificate(device_id):
+@app.route('/certificate', methods=['GET'])
+def retrieve_certificate():
     pk = certificate
     print(f"certificate: {pk}")
     if pk:
@@ -119,8 +119,6 @@ def retrieve_certificate(device_id):
             cert_pem = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate).decode('utf-8')
             response = make_response(cert_pem)
             response.headers['Content-Type'] = '"application/pkcs7-signature"'
-            response.headers['mudfile_url'] = f'/mud/{device_id}'
-            response.headers['device_id'] = device_id
             return response, 200
         except Exception as e:
             print(f"Error retrieving MUD URL: {e}")

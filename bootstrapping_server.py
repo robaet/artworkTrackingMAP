@@ -38,7 +38,7 @@ ERROR_PORT = 65535
 
 #Function to tell server to retrieve a MUD file for a device
 #Send a request to the MUD server with a device ID, also verifies the MUD file
-def get_mudfile(mudfile_url, device_id, certificate_path, fromupdate):
+def get_mudfile(mudfile_url, addr, fromupdate):
     try:
         headers = {
             "Accept": "application/mud+json",
@@ -49,22 +49,22 @@ def get_mudfile(mudfile_url, device_id, certificate_path, fromupdate):
         if response.status_code == 200:
             data = json.loads(response.content.decode('utf-8'))
             mud = data["mud"]
+            device_id = data["device_id"]
             sig = bytes.fromhex(data["sig"])
-            if not verify_signature(json.dumps(mud).encode('utf-8'), sig, certificate_path):
-                print(f"MUD file retrieved for device ID {device_id} is invalid.")
-                return False
-            else:
-                enforce_ip_table(translate_to_iptables(parse_mud(mud)))
-                return True
+            certificate_url = data["certificate_url"]
+            parsed = urlparse(mudfile_url)
+            certificate_url = f"{parsed.scheme}://{parsed.netloc}" + certificate_url
+            print(f"Received MUD file for device ID {device_id} from {mudfile_url}")
+            print("certificate_url: " + certificate_url)
+            return get_certificate(certificate_url, addr, mud, sig, device_id, parsed.hostname, mudfile_url)
         else:
             print(f"Failed to request MUD file retrieval for device ID {device_id}. HTTP status code: {response.status_code}")
-            return False
+            return ERROR_PORT
     except requests.RequestException as e:
-        print(f"An error occurred in bootstrapping server trying to get MUD File for device ID {device_id} {fromupdate}: {e}")
-        return False
+        print(f"An error occurred in bootstrapping server trying to get MUD File for device ID {device_id} {' in update policy' if fromupdate else ''}: {e}")
+        return ERROR_PORT
 
-def get_public_key_mudfile(certificate_url, addr):
-    print("certificate url: " + certificate_url)
+def get_certificate(certificate_url, addr, mud, sig, device_id, mud_server_ip, mudfile_url):
     try:
         headers = {
             "Accept": "application/mud+json",
@@ -73,20 +73,17 @@ def get_public_key_mudfile(certificate_url, addr):
         }
         response = requests.get(certificate_url, headers=headers)
 
-        mudfile_url = response.headers.get('mudfile_url')
-        parsed = urlparse(certificate_url)
-        mudfile_url = f"{parsed.scheme}://{parsed.netloc}"+mudfile_url
-        print("mudfileurl: "+mudfile_url)
-
-        device_id = response.headers.get('device_id')
-        certificate_path = f'{parsed.hostname}_{device_id}_certificate.pem'
+        certificate_path = f'{mud_server_ip}_{device_id}_certificate.pem'
         with open(certificate_path, 'wb') as f:
             f.write(response.content)
             print(f"Certificate saved to {certificate_path}")
-        if not get_mudfile(mudfile_url, device_id, certificate_path, False):
-            print(f"Failed to retrieve MUD file for device ID {device_id}.")
+        
+        if not verify_signature(json.dumps(mud).encode('utf-8'), sig, certificate_path):
+            print(f"MUD file retrieved for device ID {device_id} is invalid.")
             return ERROR_PORT
-        inventory.set_devices(Device(device_id, certificate_path, mudfile_url, addr))
+        else:
+            enforce_ip_table(translate_to_iptables(parse_mud(mud)))
+            inventory.set_devices(Device(device_id, mudfile_url, addr))
     except Exception as e:
         print(f"An error occurred while retrieving the certificate: {e}")
         return ERROR_PORT
@@ -119,9 +116,9 @@ def parse_mud(mud):
 def update_policies():
     devices_to_remove = []
     for device in inventory.get_devices():
-        print(f"update_policies: {device.getMudUrl()}, {device.getId()}, {device.getCertificate()}")
+        print(f"update_policies: {device.getMudUrl()}, {device.getId()}")
         
-        if not get_mudfile(device.getMudUrl(), device.getId(), device.getCertificate(), True):
+        if get_mudfile(device.getMudUrl(), device.getId(), True) == ERROR_PORT:
             print(f"Failed to retrieve MUD file for device ID {device.getId()}.")
             remove_rules_with_certain_ip(device.getIpAddress())
             devices_to_remove.append(device)
@@ -205,16 +202,15 @@ def start_tcp_mudlink_server():
                         messages = buffer.decode('utf-8')
                         print("messages 4000: ")
                         print(messages)
-                        port = get_public_key_mudfile(messages, addr[0])
+                        port = get_mudfile(messages, addr, False)
                         buffer = messages[-1].encode('utf-8')
-
-                        conn.sendall(struct.pack('!H', port))
+                        conn.sendto(struct.pack('!H', port), addr)
                         print(f"Sent port {port} back to the sender.")
                     except UnicodeDecodeError:
                         print("Received non-decodable bytes. Skipping.")
                         buffer = b""
-                        conn.sendall(struct.pack('!H', ERROR_PORT))
-                        print(f"Sent port {ERROR_PORT} back to the sender.")
+                        conn.sendto(struct.pack('!H', ERROR_PORT), addr)
+                        print(f"Sent port {ERROR_PORT} back to the sender {addr}.")
 
 def process_json_message(message):
     data_points = []
