@@ -64,7 +64,7 @@ def get_mudfile(mudfile_url, addr, fromupdate):
         print(f"An error occurred in bootstrapping server trying to get MUD File for device ID {device_id} {' in update policy' if fromupdate else ''}: {e}")
         return ERROR_PORT
 
-def get_certificate(certificate_url, addr, mud, sig, device_id, mud_server_ip, mudfile_url):
+def get_certificate(certificate_url, addr, mud, sig, device_id, mud_server_ip, mudfile_url, fromupdate):
     try:
         headers = {
             "Accept": "application/mud+json",
@@ -83,7 +83,8 @@ def get_certificate(certificate_url, addr, mud, sig, device_id, mud_server_ip, m
             return ERROR_PORT
         else:
             enforce_ip_table(translate_to_iptables(parse_mud(mud)))
-            inventory.set_devices(Device(device_id, mudfile_url, addr))
+            if not fromupdate:
+                inventory.set_devices(Device(device_id, mudfile_url, addr))
     except Exception as e:
         print(f"An error occurred while retrieving the certificate: {e}")
         return ERROR_PORT
