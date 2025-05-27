@@ -45,7 +45,7 @@ Once the AWS server instances are running you need to adjust the MUD URL and IP 
 * Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for the IP conversion for example.
 * Replace the IP in the current value of `MUD_URL` with the public IP of the AWS instance on which the Mud Server runs.
 
-If u want to you can change how often the connectivity data is updated on the board's side in [plf_sw_config.h](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Projects/B_L462E/Demonstrations/Cellular/STM32_Cellular/App). Just change the value of the variable `CST_MODEM_POLLING_PERIOD` on line 55.
+If u want to you can change how often the connectivity data is updated on the board's side in [plf_sw_config.h](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Projects/B_L462E/Demonstrations/Cellular/STM32_Cellular/App/plf_sw_config.h). Just change the value of the variable `CST_MODEM_POLLING_PERIOD` on line 55.
 
 Don't forget to build the project after making changes to the source code of the board. You can do so via the top menu of the STM32CubeIDE: via "Project" -> "Build Project".
 
