@@ -38,12 +38,12 @@ To run the servers simply run the command "sudo python3 bootstrapping_server.py"
 
 # Board
 As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicroelectronics, with additional SIM slot and antenna. 
-We used STMCUBEIDE to edit and build the code of the board.
-Open [the project file](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Projects/B_L462E/Demonstrations/Cellular/IDE/STM32CubeIDE) in [STM32CUBEIDE](https://www.st.com/content/st_com/en/stm32cubeide.html). We used version 1.14.1 .
+We used [STM32CUBEIDE](https://www.st.com/content/st_com/en/stm32cubeide.html) to edit and build the code of the board. We used version 1.14.1.
+Open [the project file](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Projects/B_L462E/Demonstrations/Cellular/IDE/STM32CubeIDE) in the IDE.
 
 Once the AWS server instances are running you need to adjust the MUD URL and IP from the Bootstrapping Server in [custom_client.c](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Middlewares/ST/STM32_Cellular/Samples/Custom/Src/custom_client.c).
-Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for the IP conversion for example.
-Replace the IP in the current value of `MUD_URL` with the IP of the AWS instance on which the Mud Server runs.
+* Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for the IP conversion for example.
+* Replace the IP in the current value of `MUD_URL` with the IP of the AWS instance on which the Mud Server runs.
 
 Don't forget to build the project after making changes to the source code of the board.
 
