@@ -52,7 +52,7 @@ extern "C" {
 
 /* Polling modem period */
 #if (USE_SOCKETS_TYPE == USE_SOCKETS_MODEM)
-#define CST_MODEM_POLLING_PERIOD          (10000U)  /* Polling period = 10s */
+#define CST_MODEM_POLLING_PERIOD          (1000U)  /* Polling period = 1s */
 #else
 #define CST_MODEM_POLLING_PERIOD          (0U)      /* No polling for modem monitoring */
 #endif /* (USE_SOCKETS_TYPE == USE_SOCKETS_MODEM) */

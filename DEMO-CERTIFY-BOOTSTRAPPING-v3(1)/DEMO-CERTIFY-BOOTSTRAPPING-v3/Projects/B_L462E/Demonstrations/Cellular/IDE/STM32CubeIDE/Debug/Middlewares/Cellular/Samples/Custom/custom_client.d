@@ -93,6 +93,9 @@ Middlewares/Cellular/Samples/Custom/custom_client.o: \
  ../../../STM32_Cellular/App/plf_config.h \
  ../../../../../../../Middlewares/ST/STM32_Cellular/Interface/Com/Inc/com_sockets_net_compat.h \
  ../../../../../../../Middlewares/ST/STM32_Cellular/Modules/DataCache_Supplier/Inc/dc_mems.h \
+ ../../../../../../../Middlewares/ST/STM32_Cellular/Core/Cellular_Service/Inc/cellular_service_utils.h \
+ ../../../../../../../Middlewares/ST/STM32_Cellular/Core/Cellular_Service/Inc/cellular_service_task.h \
+ ../../../../../../../Middlewares/ST/STM32_Cellular/Core/Cellular_Service/Inc/cellular_service_config.h \
  ../../../../../../../Middlewares/ST/STM32_Cellular/Modules/Cmd/Inc/cmd.h
 ../../../STM32_Cellular/App/plf_config.h:
 ../../../../../../../Middlewares/ST/STM32_Cellular/Samples/Custom/Inc/plf_custom_config.h:
@@ -189,4 +192,7 @@ Middlewares/Cellular/Samples/Custom/custom_client.o: \
 ../../../STM32_Cellular/App/plf_config.h:
 ../../../../../../../Middlewares/ST/STM32_Cellular/Interface/Com/Inc/com_sockets_net_compat.h:
 ../../../../../../../Middlewares/ST/STM32_Cellular/Modules/DataCache_Supplier/Inc/dc_mems.h:
+../../../../../../../Middlewares/ST/STM32_Cellular/Core/Cellular_Service/Inc/cellular_service_utils.h:
+../../../../../../../Middlewares/ST/STM32_Cellular/Core/Cellular_Service/Inc/cellular_service_task.h:
+../../../../../../../Middlewares/ST/STM32_Cellular/Core/Cellular_Service/Inc/cellular_service_config.h:
 ../../../../../../../Middlewares/ST/STM32_Cellular/Modules/Cmd/Inc/cmd.h:

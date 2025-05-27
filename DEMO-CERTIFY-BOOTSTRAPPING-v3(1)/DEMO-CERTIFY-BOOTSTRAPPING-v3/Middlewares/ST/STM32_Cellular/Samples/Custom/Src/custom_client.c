@@ -40,10 +40,14 @@
 #include "com_sockets_net_compat.h"
 #include "dc_mems.h"
 
-#define SERVER_LOG_IP                 	((uint32_t)222050927) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
-#define SERVER_LOG_PORT                 ((uint16_t)5000)
+#include "cellular_service_utils.h"
+
+
+#define SERVER_LOG_IP                 	((uint32_t)857055654) /*13.60.194.107  222085739*/ /* 0x9B22D734U 52.215.34.155  2478242818 */     /* 52.47.67.227   0x342f43e3    875512803  */
+//#define SERVER_LOG_PORT                 ((uint16_t)9999)
 #define MUD_LINK_PORT					((uint16_t)4000)
-#define MUD_LINK_IP 					"51.20.6.73:6000/certificate"
+#define MUD_URL 						"13.60.22.32:6000/mud"
+#define MUD_DEVICE_ID					((int)1)
 
 
 
@@ -53,28 +57,28 @@ typedef struct
 	int data_len;
 } logBuffer_t;
 
-static logBuffer_t logBuffer;
+static logBuffer_t socketResponse;
 
+static logBuffer_t logBuffer;
+static uint16_t SERVER_LOG_PORT = -1;
 
 static bool custom_log_mems()
 {
 	dc_temperature_info_t   temperature_info;
 	dc_humidity_info_t		humidity_info;
-	dc_accelerometer_info_t acceleration_info;
 	char 					mems_string[64];
 	int						mems_string_len;
 
 	char str_tmp[100] = "";
 	char str_hum[100] = "";
-	char str_acc[100] = "";
+	char str_dbm[100] = "";
 	float temp_value = 0;
 	float hum_value = 0;
+	int32_t dbm_value = cst_cellular_info.cs_signal_level_db;
 
 	// read the MEM data
 	(void)dc_com_read(&dc_com_db, DC_COM_TEMPERATURE, (void *)&temperature_info, sizeof(temperature_info));
     (void)dc_com_read(&dc_com_db, DC_COM_HUMIDITY, (void *)&humidity_info, sizeof(humidity_info));
-    (void)dc_com_read(&dc_com_db, DC_COM_ACCELEROMETER, (void *)&acceleration_info, sizeof(acceleration_info));
-    PRINT_INFO("\n acc info %ld \n",acceleration_info.accelerometer.AXIS_X);
 
     temp_value = temperature_info.temperature;
     int tempInt = (int)temp_value;
@@ -88,21 +92,18 @@ static bool custom_log_mems()
 	float humFrac = hum_value - humInt1;
 	int humInt2 = trunc(humFrac * 100);
 
-	dc_sensor_axe_t acc_data = acceleration_info.accelerometer;
-	dc_service_rt_state_t acc_info = acceleration_info.rt_state;
-
 	// convert to string the temperature and humidity
     //mems_string_len= sprintf(mems_string,"time=%d;temperature=%f;humidity=%f;acceleration=%li, %li, %li",xTaskGetTickCount(),temperature_info.temperature, humidity_info.humidity, acc_data.AXIS_X, acc_data.AXIS_Y, acc_data.AXIS_Z);
     //mems_string_len= sprintf(mems_string,"time=%lu;temperature=%f;humidity=%f",(unsigned long)time(NULL),temperature_info.temperature, humidity_info.humidity);
-    mems_string_len= sprintf(mems_string, "{\"time\": \"%d\",\"temperature\": \"%f\",\"humidity\": \"%f\",\"acceleration\": \"[%li,%li,%li]\"}", xTaskGetTickCount(),temperature_info.temperature, humidity_info.humidity, acc_data.AXIS_X, acc_data.AXIS_Y, acc_data.AXIS_Z);
+    mems_string_len= sprintf(mems_string, "{\"time\": \"%d\",\"dbm\": \"%d\",\"temperature\": \"%f\",\"humidity\": \"%f\"}", xTaskGetTickCount(), dbm_value, temperature_info.temperature, humidity_info.humidity);
 
     snprintf(str_tmp,100," TEMPERATURE = %d.%02d degree C\n\r", tmpInt1, tmpInt2);
     snprintf(str_hum,100," HUMIDITY = %d.%02d %%\n\r", humInt1, humInt2);
-    snprintf(str_acc,100," ACCELERATION = %li, %li, %li \n\r", acc_data.AXIS_X, acc_data.AXIS_Y, acc_data.AXIS_Z);
+    snprintf(str_dbm, 100," DBM = %d\n\r", dbm_value);
 
     HAL_UART_Transmit(&huart1,( uint8_t *)str_tmp,sizeof(str_tmp),1000);
 	HAL_UART_Transmit(&huart1,( uint8_t *)str_hum,sizeof(str_hum),1000);
-	HAL_UART_Transmit(&huart1,( uint8_t *)str_acc,sizeof(str_acc),1000);
+	HAL_UART_Transmit(&huart1,( uint8_t *)str_dbm,sizeof(str_dbm),1000);
 
 	HAL_Delay(1000);
 	// append in logBuffer as string
@@ -116,6 +117,9 @@ static bool custom_log_mems()
 		return false;
 	}
 	return true;
+}
+uint16_t ntohs(uint16_t netshort) {
+    return (netshort << 8) | (netshort >> 8);
 }
 
 static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int send_mud_link)
@@ -164,7 +168,24 @@ static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int
                 	{
 						result = true;
 					}
-
+                	PRINT_INFO("before data size%d", socketResponse.data_len);
+                	if (send_mud_link==1)
+                	{
+						uint8_t buf[2];
+						int32_t ret2 = com_recv(id, (com_char_t *)buf, 2, COM_MSG_WAIT);
+						if (ret2 == 2) {
+							uint16_t net_port;
+							memcpy(&net_port, buf, 2);
+							uint16_t port = ntohs(net_port);
+							PRINT_INFO("Received port = %u\n", port);  // Should print 5000
+							SERVER_LOG_PORT = port;
+							result = true;
+						} else {
+							PRINT_INFO("Receive failed, got %d bytes\n", ret2);
+							SERVER_LOG_PORT = -1;
+							result = false;
+						}
+                	}
 					// close the socket
 					if (com_closesocket(id) == COM_SOCKETS_ERR_OK)
 					{
@@ -178,6 +199,10 @@ static bool custom_connect_and_send_data(char * buffer_addr, int buffer_len, int
                 else
                 {
                 	PRINT_INFO("socket connect NOK\n\r")
+					if (com_closesocket(id) == COM_SOCKETS_ERR_OK)
+						{
+							PRINT_INFO("socket close OK\n\r")
+						}
                 }
 	          }
 	          else
@@ -306,7 +331,6 @@ static cmd_status_t custom_client_cmd_help(uint8_t *cmd_p,
   */
 static cmd_status_t custom_client_cmd(uint8_t *cmd_line_p)
 {
-  PRINT_INFO("JUHU: %d", cmd_line_p)
   uint32_t argc;
   uint8_t  *argv_p[10];
   uint8_t  *cmd_p;
@@ -353,6 +377,8 @@ static cmd_status_t custom_client_cmd(uint8_t *cmd_line_p)
 			memset(logBuffer.data, 0, sizeof(logBuffer.data));
 			logBuffer.data_len=0;
 		}
+		memset(logBuffer.data, 0, sizeof(logBuffer.data));
+		logBuffer.data_len=0;
     }
     //send mud link
     else if (memcmp((CRC_CHAR_t *)argv_p[0],
@@ -442,20 +468,30 @@ static bool send_mudfile_link()
 {
 	int	mems_string_len;
 	char mems_string[100];
-	mems_string_len = snprintf(mems_string, sizeof(mems_string), "http://%s", MUD_LINK_IP);
+	mems_string_len = snprintf(mems_string, sizeof(mems_string), "http://%s/%d", MUD_URL, MUD_DEVICE_ID);
 	if ((logBuffer.data_len + mems_string_len) <= (sizeof(logBuffer.data)))
 		{
 			memcpy(&logBuffer.data[logBuffer.data_len], (const void *)mems_string, mems_string_len);
 			logBuffer.data_len += mems_string_len;
 		}
+	do {
+		if (custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1))
+		{
+			PRINT_INFO("data port received")
+		}
+		else
+		{
+			const TickType_t delay = 5000;
+			PRINT_INFO("Mud link failed. Trying again in %d milliseconds.", delay);
+			vTaskDelay( delay );
+		}
+	} while (SERVER_LOG_PORT == -1 || SERVER_LOG_PORT == 65535);
 
-	if (custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1) == true)
-	{
-		memset(logBuffer.data, 0, sizeof(logBuffer.data));
-		logBuffer.data_len=0;
-		return true;
-	}
-	return false;
+
+	//custom_connect_and_send_data(logBuffer.data, logBuffer.data_len, 1);
+	memset(logBuffer.data, 0, sizeof(logBuffer.data));
+	logBuffer.data_len=0;
+	return true;
 }
 static void custom_client_thread(void *p_argument)
 {
@@ -468,12 +504,14 @@ static void custom_client_thread(void *p_argument)
 	(void)rtosalMessageQueueGet(custom_client_queue, &msg_queue, RTOSAL_WAIT_FOREVER);
 
     /* Block for 5000ms. */
-    const TickType_t xDelay = 5000 / portTICK_PERIOD_MS;
+    const TickType_t xDelay = 1000 / portTICK_PERIOD_MS;
     send_mudfile_link();
     for( ;; )
     {
         // Perform action here: log the mems
         custom_log_mems();
+        uint8_t cmd[] = "custclt send";
+		custom_client_cmd(cmd);
 
         // Wait for the next cycle.
         vTaskDelay( xDelay );
