@@ -47,7 +47,7 @@ Once the AWS server instances are running you need to adjust the MUD URL and IP 
 
 If u want to you can change how often the connectivity data is updated on the board's side in [plf_sw_config.h](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Projects/B_L462E/Demonstrations/Cellular/STM32_Cellular/App). Just change the value of the variable `CST_MODEM_POLLING_PERIOD` on line 55.
 
-Don't forget to build the project after making changes to the source code of the board.
+Don't forget to build the project after making changes to the source code of the board. You can do so via the top menu of the STM32CubeIDE: via "Project" -> "Build Project".
 
 To run the board code you connect the board to your computer and open TeraTerm. In TeraTerm click on "Serial" then "ok". Then in TeraTerm click "setup", "Serial port" and set Speed to 115200 and press "new setting". Then send the binary file "Prj_Murata_L462.bin" to the board and enter "mems period 1000" into the command line.
 
