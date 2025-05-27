@@ -38,7 +38,7 @@ To run the servers simply run the command "sudo python3 bootstrapping_server.py"
 
 # Board
 As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicroelectronics, with additional SIM slot and antenna. 
-We used [STM32CUBEIDE](https://www.st.com/content/st_com/en/stm32cubeide.html) to edit and build the code of the board. We used version 1.14.1.
+We used [STM32CubeIDE](https://www.st.com/content/st_com/en/stm32cubeide.html) to edit and build the code of the board. We used version 1.14.1.
 Open [the project file](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Projects/B_L462E/Demonstrations/Cellular/IDE/STM32CubeIDE) in the IDE.
 
 Once the AWS server instances are running you need to adjust the MUD URL and IP from the Bootstrapping Server in [custom_client.c](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Middlewares/ST/STM32_Cellular/Samples/Custom/Src/custom_client.c).
