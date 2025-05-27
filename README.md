@@ -43,7 +43,7 @@ Open [the project file](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPP
 
 Once the AWS server instances are running you need to adjust the MUD URL and IP from the Bootstrapping Server in [custom_client.c](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)/DEMO-CERTIFY-BOOTSTRAPPING-v3/Middlewares/ST/STM32_Cellular/Samples/Custom/Src/custom_client.c).
 * Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for the IP conversion for example.
-* Replace the IP in the current value of `MUD_URL` with the IP of the AWS instance on which the Mud Server runs.
+* Replace the IP in the current value of `MUD_URL` with the public IP of the AWS instance on which the Mud Server runs.
 
 Don't forget to build the project after making changes to the source code of the board.
 
