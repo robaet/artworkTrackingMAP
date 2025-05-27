@@ -2,7 +2,7 @@
 
 # Introduction
 This README explains how to run the code in this repository in order to imitate the results of our thesis.
-The code to get the servers working lies within the "artworkTrackingMAP" folder. The .bin file for the ST-board can be found [here](\DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\Debug\Prj_Murata_L462.bin).
+The code to get the servers working lies within the "artworkTrackingMAP" folder. The .bin file for the ST-board can be found [here](DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\Debug\Prj_Murata_L462.bin).
 
 # Servers
 ## What Type
