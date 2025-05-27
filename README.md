@@ -37,7 +37,15 @@ To run the servers simply run the command "sudo python3 bootstrapping_server.py"
 
 
 # Board
-As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicroelectronics, with additional SIM slot and antenna. To run the board code you connect the board to your computer and open TeraTerm. In TeraTerm click on "Serial" then "ok". Then in TeraTerm click "setup", "Serial port" and set Speed to 115200 and press "new setting". Then send the binary file "Prj_Murata_L462.bin" to the board and enter "mems period 1000" into the command line.
+As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicroelectronics, with additional SIM slot and antenna. 
+
+Once the AWS server instances are running you need to adjust the MUD URL and IP from the Bootstrapping Server in custom_client.c . link zum file adde
+Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for example.
+Replace the IP in the current value of `MUD_URL?` with the IP of the AWS instance on which the Mud Server runs.
+
+Then you need to build the project.
+
+To run the board code you connect the board to your computer and open TeraTerm. In TeraTerm click on "Serial" then "ok". Then in TeraTerm click "setup", "Serial port" and set Speed to 115200 and press "new setting". Then send the binary file "Prj_Murata_L462.bin" to the board and enter "mems period 1000" into the command line.
 
 # Data
 If everything runs, the system will automatically log data on the Bootstrapping Server in the sensor_data.txt file. The connection_log.txt file logs from what IP connections have been established, if that is of interest.
