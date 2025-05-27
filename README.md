@@ -2,7 +2,7 @@
 
 # Introduction
 This README explains how to run the code in this repository in order to imitate the results of our thesis.
-The code to get the servers working lies within the "artworkTrackingMAP" folder. The .bin file for the ST-board can be found in "artworkTrackingMAP\DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\Debug\Prj_Murata_L462.bin".
+The code to get the servers working lies within the "artworkTrackingMAP" folder. The .bin file for the ST-board can be found [\DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE\Debug\Prj_Murata_L462.bin](here).
 
 # Servers
 ## What Type
@@ -38,12 +38,14 @@ To run the servers simply run the command "sudo python3 bootstrapping_server.py"
 
 # Board
 As stated in the Thesis, we used the B-L462E-CELL1 IoT Discovery Kit from STMicroelectronics, with additional SIM slot and antenna. 
+We used STMCUBEIDE to edit and build the code of the board.
+Open [\DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Projects\B_L462E\Demonstrations\Cellular\IDE\STM32CubeIDE](the project file) in [https://www.st.com/content/st_com/en/stm32cubeide.html](STM32CUBEIDE). We used version 1.14.1 .
 
-Once the AWS server instances are running you need to adjust the MUD URL and IP from the Bootstrapping Server in custom_client.c . link zum file adde
-Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for example.
-Replace the IP in the current value of `MUD_URL?` with the IP of the AWS instance on which the Mud Server runs.
+Once the AWS server instances are running you need to adjust the MUD URL and IP from the Bootstrapping Server in [\DEMO-CERTIFY-BOOTSTRAPPING-v3(1)\DEMO-CERTIFY-BOOTSTRAPPING-v3\Middlewares\ST\STM32_Cellular\Samples\Custom\Src\custom_client.c](custom_client.c).
+Replace the current value of `SERVER_LOG_IP` with the decimal value of the public IP of the AWS instance on which the Bootstrapping Server runs. You can use [this website](https://tools.iplocation.net/ip-to-integer-converter) for the IP conversion for example.
+Replace the IP in the current value of `MUD_URL` with the IP of the AWS instance on which the Mud Server runs.
 
-Then you need to build the project.
+Don't forget to build the project after making changes to the source code of the board.
 
 To run the board code you connect the board to your computer and open TeraTerm. In TeraTerm click on "Serial" then "ok". Then in TeraTerm click "setup", "Serial port" and set Speed to 115200 and press "new setting". Then send the binary file "Prj_Murata_L462.bin" to the board and enter "mems period 1000" into the command line.
 
