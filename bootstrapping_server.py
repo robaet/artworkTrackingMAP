@@ -1,4 +1,3 @@
-from flask import Flask, request, jsonify
 from rule_enforcement import translate_to_iptables, enforce_ip_table, delete_all_rules, get_current_iptables, remove_rules_with_certain_ip
 import requests
 import json
@@ -10,7 +9,6 @@ import socket
 import time
 import threading
 import signal
-import subprocess
 import re
 import struct
 from Device import Device
@@ -36,8 +34,6 @@ MUD_LINK_SERVER_PORT = 4000
 ERROR_PORT = 65535
 
 
-#Function to tell server to retrieve a MUD file for a device
-#Send a request to the MUD server with a device ID, also verifies the MUD file
 def get_mudfile(mudfile_url, addr, fromupdate):
     try:
         headers = {
@@ -90,7 +86,6 @@ def get_certificate(certificate_url, addr, mud, sig, device_id, mud_server_ip, m
         return ERROR_PORT
     return DATA_SERVER_PORT
 
-#Function to parse the MUD file
 def parse_mud(mud):
     policies = []
     acl = mud['policy']['acl']
@@ -101,11 +96,10 @@ def parse_mud(mud):
                 'direction': direction,
                 'protocol': rule['protocol'],
                 'src-ports': rule.get('src-port', []),
-                'dst-ports': rule.get('dst-port', []),  # Use get() in case dst-port is missing
+                'dst-ports': rule.get('dst-port', []),
                 'action': rule['action']
             }
 
-            # Optional IP-based filtering
             if 'src-ip' in rule:
                 policy['src-ip'] = rule['src-ip']
             if 'dst-ip' in rule:
@@ -144,8 +138,8 @@ def start_tcp_data_server():
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
-        server_socket.listen(5) # 5 connections
-        server_socket.settimeout(1.0)  # Timeout after 1 second
+        server_socket.listen(5)
+        server_socket.settimeout(1.0)
 
         print(f"Server listening on {HOST}:{PORT}")
 
@@ -181,8 +175,8 @@ def start_tcp_mudlink_server():
     PORT = MUD_LINK_SERVER_PORT
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((HOST, PORT))
-        server_socket.listen(5) # 5 connections
-        server_socket.settimeout(1.0)  # Timeout after 1 second
+        server_socket.listen(5)
+        server_socket.settimeout(1.0)
 
         print(f"Server listening on {HOST}:{PORT}")
 

@@ -1,11 +1,6 @@
 from flask import Flask, jsonify, request, make_response
 from key_generator import generate_key_pair, sign_file
 import json
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric import utils
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from OpenSSL import crypto
 import signal
 import re
@@ -29,7 +24,6 @@ class Inventory:
 
 inventory = Inventory()
 
-#TODO make reasonably safe
 private_key, certificate = generate_key_pair()
 
 #Sample device MUD file in JSON format. This MUD file (if enforced correctly) would allow the IoT device to accept inbound HTTP and HTTPS
@@ -79,7 +73,6 @@ device_mud = {
 
 #Function to check if the IP address is in the allowed set
 def is_valid_ip(ip_address):
-    # check if the IP address is in the allowed set
     return ip_address in ALLOWED_IPS
 
 #Endpoint to retrieve MUD file for a specific device
@@ -100,15 +93,8 @@ def get_mudfile(device_id):
             print(f"Error retrieving MUD file: {e}")
             return jsonify({'error': 'MUD file not found for device {device_id}'}), 404
     return jsonify({'error': 'MUD file not found for device {device_id}'}), 404
-    
-    '''else:
-        inventory.store_mud(device_id, device_mud)
-        print(f"sample MUD file used for device ID {device_id}")
-        mud2 = json.loads(json.dumps(device_mud, sort_keys=True))
-        signature = sign_file(json.dumps(mud2).encode('utf-8'), private_key)
-        return {"mud": mud2, "sig": signature.hex()}, 200'''
 
-#Endpoint to retrieve the public key of the server
+#Endpoint to retrieve the certificate of the server
 @app.route('/certificate', methods=['GET'])
 def retrieve_certificate():
     pk = certificate

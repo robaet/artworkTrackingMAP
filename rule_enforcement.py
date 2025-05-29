@@ -1,9 +1,7 @@
-from flask import jsonify
 import subprocess
 
 
 def enforce_ip_table(ip_table):
-    #return "enforce_ip_table worked"
     for command in ip_table:
         try:
             result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -14,7 +12,6 @@ def enforce_ip_table(ip_table):
     return True
 
 def translate_to_iptables(policies):
-    #return "translate_to_iptables worked"
     iptables_rules = []
     for policy in policies:
         src_ports = policy.get('src-ports', [])
@@ -58,7 +55,6 @@ def translate_to_iptables(policies):
     return iptables_rules
 
 def delete_all_rules():
-    #return "delete_all_rules worked"
     try:
         subprocess.run(['iptables', '-F'], check=True)
         print("All iptables rules deleted.")
@@ -66,7 +62,6 @@ def delete_all_rules():
         print(f"Error deleting iptables rules: {e}")
 
 def get_current_iptables():
-    #return "get_current_iptables worked"
     try:
         result = subprocess.run(['iptables', '-L', '-n', '-v'], capture_output=True, text=True, check=True)
         return result.stdout
@@ -89,7 +84,7 @@ def remove_rules_with_certain_ip(ip_address):
         
         for rule in rules:
             if ip_address in rule:
-                delete_rule = rule.replace("-A", "-D", 1)  # Change to delete
+                delete_rule = rule.replace("-A", "-D", 1)
                 print(f"Removing rule: {delete_rule}")
                 subprocess.run(
                     ["iptables"] + delete_rule.split(),

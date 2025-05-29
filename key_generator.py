@@ -1,12 +1,9 @@
 from OpenSSL import crypto
-import cryptography
 
 def generate_key_pair():
-    # Generate a key pair
     key = crypto.PKey()
     key.generate_key(crypto.TYPE_RSA, 2048)
     
-    # Generate a self-signed certificate
     cert = crypto.X509()
     cert.get_subject().CN = "example.com"
     cert.set_serial_number(1000)
@@ -19,13 +16,7 @@ def generate_key_pair():
     return key, cert
 
 def sign_file(data, private_key):
-    '''with open(file_path, 'rb') as f:
-        data = f.read()
-    '''
-    # Create a signature using the private key
-    #signature = cryptography.hazmat.primitives.asymmetric.rsa.generate_private_key(private_key, data, 'sha256')
     signature = crypto.sign(private_key, data, 'sha256')
-    
     return signature
 
 def verify_signature(data, signature, certificate_path):
@@ -33,7 +24,6 @@ def verify_signature(data, signature, certificate_path):
         pem_data = f.read()
     certificate = crypto.load_certificate(crypto.FILETYPE_PEM, pem_data)
     try:
-        # Verify the signature using the public key from the certificate
         crypto.verify(certificate, signature, data, 'sha256')
         print("Signature verified")
         return True
