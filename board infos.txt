@@ -1,9 +1,0 @@
-custom_connect_and_send_data, 
-custom_log_mems, 
-custom_client_thread, 
-send_mudfile_link,
-plf_sw_config.h: CST_MODEM_POLLING_PERIOD line 55,
-ntohs
-
-mems period 1000 --> hüüfiger sensore abfröge lah
-custclt send

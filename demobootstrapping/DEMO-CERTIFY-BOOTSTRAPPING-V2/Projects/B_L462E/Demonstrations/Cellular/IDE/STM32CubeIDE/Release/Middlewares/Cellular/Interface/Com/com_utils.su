@@ -1,3 +1,0 @@
-C:/Dev/DEMO-CERTIFY-BOOTSTRAPPING/Middlewares/ST/STM32_Cellular/Interface/Com/Src/com_utils.c:32:13:com_utils_convertDigitToValue	0	static
-C:/Dev/DEMO-CERTIFY-BOOTSTRAPPING/Middlewares/ST/STM32_Cellular/Interface/Com/Src/com_utils.c:89:6:com_utils_convertHEXToChar	16	static
-C:/Dev/DEMO-CERTIFY-BOOTSTRAPPING/Middlewares/ST/STM32_Cellular/Interface/Com/Src/com_utils.c:124:6:com_utils_convertCharToHEX	0	static
